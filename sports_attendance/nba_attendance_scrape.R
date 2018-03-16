@@ -1,14 +1,34 @@
 library(tidyverse)
+library(lubridate)
 library(rvest)
 
+
+# put in current team name, get season urls
+get_team_seasons <- function(team){
+  
+  team_url <- paste0("https://www.basketball-reference.com/teams/",
+                     team, "/")
+  
+  team_html <- read_html(team_url)
+  
+  season_url <- team_html %>% 
+    html_nodes("th a") %>% 
+    html_attr("href")
+  
+  team_table <- team_html %>% 
+    html_table() %>% 
+    data.frame() %>% 
+    janitor::clean_names() %>% 
+    mutate(season_url = paste0(
+      "https://www.basketball-reference.com", 
+      str_replace(season_url, ".html", ""),
+      "_games.html"))
+}
+
 # get every game in a season
-get_season_data <- function(team, year){
+get_season_data <- function(url){
   
-  year_url <- paste0("https://www.basketball-reference.com/teams/",
-    team, "/",
-    year, "_games.html")
-  
-  year_html <- read_html(year_url)
+  year_html <- read_html(url)
   
   box_url <- year_html %>% 
     html_nodes("#games .center a") %>% 
@@ -30,7 +50,7 @@ get_season_data <- function(team, year){
       opp = Opp,
       box_url = paste0("https://www.basketball-reference.com", box_url)
     )
-
+  
   # home <- year_html %>%
   #   html_nodes("#games td:nth-child(6)") %>%
   #   html_text()
@@ -51,10 +71,9 @@ get_season_data <- function(team, year){
   #          home = if_else(home != "@", TRUE, FALSE))
   
   year_table
-
+  
 }
 
-utah16 <- get_season_data("UTA", "1996")
 
 # function to pull attendance number from a game page
 get_attendance <- function(page_url){
@@ -65,7 +84,20 @@ get_attendance <- function(page_url){
   str_extract(box_html, "Attendance:.*[:digit:]") %>% parse_number()
 }
 
-jazz16 <- utah16 %>% 
+dat <- get_team_seasons("CHA")
+
+dat_season <- map_dfr(cha$season_url[2:6], get_season_data)
+
+dat_att <- cha_season %>% 
   filter(home == TRUE) %>% 
   mutate(att = map_dbl(box_url, get_attendance))
 
+
+# read in old csv
+old_all_nba <- read_csv("sports_attendance/data/all_nba_attendance.csv")
+
+new_att_data <- dat_att
+
+all_nba <- bind_rows(new_att_data, old_all_nba)
+
+#write_csv(all_nba, "sports_attendance/data/all_nba_attendance.csv", na="")
