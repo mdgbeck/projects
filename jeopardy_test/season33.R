@@ -18,13 +18,20 @@ get_season_data <- function(season){
 
 }
 
-dat <- get_season_data(33)
+dat <- get_season_data(32)
 
 
-x <- suppressWarnings(map2_dfr(dat$id, dat$date, get_game_data))
-13800 / 60
+start_time = Sys.time()
 
-write_csv(x, "jeopardy_test/data/season33.csv")
+s32 <- suppressWarnings(map2_dfr(dat$id, dat$date, get_game_data))
+
+end_time = Sys.time()
+
+end_time - start_time
+
+write_csv(s32, "jeopardy_test/data/season32.csv")
+
+
 
 cat <- x %>% 
   count(category) %>% 

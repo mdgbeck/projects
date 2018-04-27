@@ -17,6 +17,7 @@ get_clue <- function(page, round, row, column){
   else if (round == 2) round <- "DJ"
   
   node <- paste("#clue", round, column, row, sep = "_")
+  if (round == 3) node <- "#clue_FJ"
   
   out <- page %>% 
     html_nodes(node) %>% 
@@ -35,6 +36,7 @@ get_response <- function(page, round, row, column){
   
   node <- paste0("#", round, " tr:nth-child(", row + 1, ") .clue:nth-child(",
                  column, ") .correct_response")
+  if (round == 3) node <- "#final_jeopardy_round .correct_response"
   
   out <- page %>% 
     html_nodes(node) %>% 
@@ -67,7 +69,7 @@ make_board <- function(page, round, type){
   }
   as.data.frame(board)
 }
-
+id = 5755
 get_game_data <- function(id, date = today()){
   
   clue_url <- paste0("http://www.j-archive.com/showgame.php?game_id=", id)
@@ -108,6 +110,16 @@ get_game_data <- function(id, date = today()){
   round2 <- left_join(clue2, resp2, by = c("category", "value")) %>% 
     mutate(round = 2)
   
+  final <- data_frame(
+    id = id, 
+    date = date,
+    round = 3,
+    value = NA,
+    category = categories[13],
+    clue = get_clue(clue_page, 3, 1, 1),
+    response = get_response(response_page, 3, 1, 1)
+  )
+  
   out <- bind_rows(round1, round2) %>% 
     transmute(
       id = id,
@@ -117,10 +129,9 @@ get_game_data <- function(id, date = today()){
       category,
       clue,
       response
-    )
+    ) %>% 
+    bind_rows(final)
   
   out
   
 }
-
-
