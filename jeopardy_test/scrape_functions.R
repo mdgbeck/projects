@@ -69,7 +69,7 @@ get_board <- function(page, round, type){
   }
   as.data.frame(board)
 }
-id = 5755
+id = 4284
 get_game_data <- function(id, date = today()){
   
   clue_url <- paste0("http://www.j-archive.com/showgame.php?game_id=", id)
@@ -79,6 +79,7 @@ get_game_data <- function(id, date = today()){
   response_page <- read_html(response_url)
   
   categories <- get_categories(clue_page)
+  if (length(categories) == 0) categories <- paste("EMPTY", 1:13)
   
   clue1 <- get_board(clue_page, round = 1, type = "clue")
   names(clue1) <- categories[1:6]
