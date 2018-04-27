@@ -2,11 +2,13 @@
 source("jeopardy_test/scrape_functions.R")
 
 
-dat <- get_season_data(2)
+dat <- get_season_data(9)
 
 dat2 <- dat
 
-dat <- dat2 %>% slice(34)
+dat <- dat2 %>% slice(59)
+s1 <- suppressWarnings(map2_dfr(dat$id, dat$date, get_game_data))
+
 
 start_time = Sys.time()
 
