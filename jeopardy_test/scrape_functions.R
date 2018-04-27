@@ -47,7 +47,7 @@ get_response <- function(page, round, row, column){
   out
 }
 
-make_board <- function(page, round, type){
+get_board <- function(page, round, type){
   
   board <- matrix(nrow = 5, ncol = 6, NA)
   
@@ -80,13 +80,13 @@ get_game_data <- function(id, date = today()){
   
   categories <- get_categories(clue_page)
   
-  clue1 <- make_board(clue_page, round = 1, type = "clue")
+  clue1 <- get_board(clue_page, round = 1, type = "clue")
   names(clue1) <- categories[1:6]
   clue1 <- clue1 %>% 
     gather(key = "category", value = "clue") %>% 
     mutate(value = rep(1:5, 6))
   
-  resp1 <- make_board(response_page, round = 1, type = "response")
+  resp1 <- get_board(response_page, round = 1, type = "response")
   names(resp1) <- categories[1:6]
   resp1 <- resp1 %>% 
     gather(key = "category", value = "response") %>% 
@@ -95,13 +95,13 @@ get_game_data <- function(id, date = today()){
   round1 <- left_join(clue1, resp1, by = c("category", "value")) %>% 
     mutate(round = 1)
   
-  clue2 <- make_board(clue_page, round = 2, type = "clue")
+  clue2 <- get_board(clue_page, round = 2, type = "clue")
   names(clue2) <- categories[7:12]
   clue2 <- clue2 %>% 
     gather(key = "category", value = "clue") %>% 
     mutate(value = rep(1:5, 6))
   
-  resp2 <- make_board(response_page, round = 2, type = "response")
+  resp2 <- get_board(response_page, round = 2, type = "response")
   names(resp2) <- categories[7:12]
   resp2 <- resp2 %>% 
     gather(key = "category", value = "response") %>% 
@@ -135,3 +135,21 @@ get_game_data <- function(id, date = today()){
   out
   
 }
+
+get_season_data <- function(season){
+  
+  season_url <- paste0("http://www.j-archive.com/showseason.php?season=",
+                       season)
+  season_html <- read_html(season_url)
+  
+  season_list <- season_html %>% 
+    html_nodes("td:nth-child(1) a")
+  
+  season_data <- data_frame(
+    url = html_attr(season_list, "href"),
+    id = str_extract(url, "\\d+"),
+    date = ymd(str_sub(html_text(season_list), -10))
+  )
+  
+}
+
