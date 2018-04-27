@@ -6,7 +6,7 @@ dat <- get_season_data(2)
 
 dat2 <- dat
 
-dat <- dat2 %>% slice(19)
+dat <- dat2 %>% slice(34)
 
 start_time = Sys.time()
 

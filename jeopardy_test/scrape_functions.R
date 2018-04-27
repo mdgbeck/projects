@@ -79,7 +79,9 @@ get_game_data <- function(id, date = today()){
   response_page <- read_html(response_url)
   
   categories <- get_categories(clue_page)
-  if (length(categories) == 0) categories <- paste("EMPTY", 1:13)
+  if (length(categories) != 13){
+    categories[(length(categories) + 1):13] <- paste("EMPTY", 1:(13 - length(categories)))
+  }
   
   clue1 <- get_board(clue_page, round = 1, type = "clue")
   names(clue1) <- categories[1:6]
