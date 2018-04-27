@@ -1,6 +1,7 @@
 # scrape questions from jarchive
 
 library(tidyverse)
+library(lubridate)
 library(rvest)
 
 get_categories <- function(page){
@@ -40,7 +41,7 @@ get_response <- function(page, round, row, column){
     html_text
   
   if (length(out) == 0) out <- ""
-
+  
   out
 }
 
@@ -52,12 +53,12 @@ make_board <- function(page, round, type){
     
     for(i in 1:nrow(board)){
       for(j in 1:ncol(board)){
-          board[i, j] <- get_clue(page, round, i, j)
+        board[i, j] <- get_clue(page, round, i, j)
       }
     }
   }
   else if (type == "response"){
-
+    
     for(i in 1:nrow(board)){
       for(j in 1:ncol(board)){
         board[i, j] <- get_response(page, round, i, j)
@@ -67,15 +68,13 @@ make_board <- function(page, round, type){
   as.data.frame(board)
 }
 
-get_game_data <- function(id){
+get_game_data <- function(id, date = today()){
   
   clue_url <- paste0("http://www.j-archive.com/showgame.php?game_id=", id)
   clue_page <- read_html(clue_url)
   
   response_url <- paste0("http://www.j-archive.com/showgameresponses.php?game_id=", id)
   response_page <- read_html(response_url)
-  
-  game_date <- 
   
   categories <- get_categories(clue_page)
   
@@ -112,13 +111,14 @@ get_game_data <- function(id){
   out <- bind_rows(round1, round2) %>% 
     transmute(
       id = id,
+      date = date,
       round,
       value,
       category,
       clue,
       response
     )
-
+  
   out
   
 }
