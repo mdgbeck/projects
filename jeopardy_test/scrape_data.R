@@ -12,7 +12,7 @@ for(i in 9:10){
   
 }
 
-for(i in 21:25){
+for(i in 33:33){
   
   dat <- get_season_data(i)
   out <- suppressWarnings(map2_dfr(dat$id, dat$date, get_game_data))
