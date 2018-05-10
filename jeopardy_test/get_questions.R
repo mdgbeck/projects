@@ -1,7 +1,17 @@
 library(tidyverse)
 library(lubridate)
 
-wrap_text <- function(string, n) {
+x <- "this is a long sentence"
+chars <- nchar(x)
+spaces <- gregexpr("\\s+", x)[[1]]
+
+
+
+
+print("Hello world")
+
+
+add_newline <- function(x, n) {
   spaces <- str_locate_all(string, " ")[[1]][,1]
   chars  <- nchar(string)
   for(i in 1:floor(chars/n)) {
@@ -65,4 +75,6 @@ easy <- all_clues %>% filter(value == 1 & date >= "2014-01-01")
 
 get_question(x)
 get_question(easy)
+
+8:00 am Thursday
 
