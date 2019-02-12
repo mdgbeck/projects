@@ -149,16 +149,24 @@ get_season_data <- function(season){
   
   season_url <- paste0("http://www.j-archive.com/showseason.php?season=",
                        season)
+  
   season_html <- read_html(season_url)
   
   season_list <- season_html %>% 
     html_nodes("td:nth-child(1) a")
   
-  season_data <- data_frame(
-    url = html_attr(season_list, "href"),
-    id = str_extract(url, "\\d+"),
-    date = ymd(str_sub(html_text(season_list), -10))
-  )
-  
+  season_data <- season_html %>% 
+    html_node("table") %>% 
+    html_table(header = FALSE) %>% 
+    transmute(
+      id = str_extract(X1, "\\d+"),
+      date = ymd(str_sub(X1, -10)),
+      player1 = str_split(X2, " vs. ", simplify = TRUE)[, 1],
+      player2 = str_split(X2, " vs. ", simplify = TRUE)[, 2],
+      player3 = str_split(X2, " vs. ", simplify = TRUE)[, 3],
+      note = X3,
+      url = html_attr(season_list, "href")
+    )
+
 }
 

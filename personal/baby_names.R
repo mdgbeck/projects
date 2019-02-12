@@ -104,3 +104,12 @@ ggplot(plot_data, aes(year, prop)) +
             aes(color = name)) +
   scale_y_continuous(label = percent) +
   theme_mdgr()
+
+write_csv(arrange(filter(bg_names, perc_girl_total > .05), mid_total), 'personal/names_bg1.csv', na="")
+
+girl2017 <-  babynames %>% 
+  filter(year == 2017 & sex == 'F') %>% 
+  arrange(desc(n)) %>% 
+  slice(1:1000) %>% 
+  write_csv(., 'personal/names_2017.csv')
+          
