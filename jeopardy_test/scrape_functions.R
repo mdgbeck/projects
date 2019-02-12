@@ -69,7 +69,7 @@ get_board <- function(page, round, type){
   }
   as.data.frame(board)
 }
-id = 4284
+
 get_game_data <- function(id, date = today()){
   
   clue_url <- paste0("http://www.j-archive.com/showgame.php?game_id=", id)
@@ -159,13 +159,14 @@ get_season_data <- function(season){
     html_node("table") %>% 
     html_table(header = FALSE) %>% 
     transmute(
-      id = str_extract(X1, "\\d+"),
+      number = str_extract(X1, "\\d+"),
       date = ymd(str_sub(X1, -10)),
       player1 = str_split(X2, " vs. ", simplify = TRUE)[, 1],
       player2 = str_split(X2, " vs. ", simplify = TRUE)[, 2],
       player3 = str_split(X2, " vs. ", simplify = TRUE)[, 3],
       note = X3,
-      url = html_attr(season_list, "href")
+      url = html_attr(season_list, "href"),
+      id = str_extract(url, "\\d+")
     )
 
 }
