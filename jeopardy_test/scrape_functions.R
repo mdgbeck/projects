@@ -83,10 +83,10 @@ get_game_data <- function(id, date = today()){
     categories[(length(categories) + 1):13] <- paste(
       "EMPTY", 1:(13 - length(categories)))
   }
-  else if(length(unique(categories)) != 13){
-    categories[duplicated(categories)] <- paste(
-      "EMPTY", 1:length(categories[duplicated(categories)]))
-  }
+  # else if(length(unique(categories)) != 13){
+  #   categories[duplicated(categories)] <- paste(
+  #     "EMPTY", 1:length(categories[duplicated(categories)]))
+  # }
   
   clue1 <- get_board(clue_page, round = 1, type = "clue")
   names(clue1) <- categories[1:6]
