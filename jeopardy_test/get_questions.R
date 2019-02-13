@@ -1,17 +1,8 @@
 library(tidyverse)
 library(lubridate)
+library(stringr)
 
-x <- "this is a long sentence"
-chars <- nchar(x)
-spaces <- gregexpr("\\s+", x)[[1]]
-
-
-
-
-print("Hello world")
-
-
-add_newline <- function(x, n) {
+add_newline <- function(string, n) {
   spaces <- str_locate_all(string, " ")[[1]][,1]
   chars  <- nchar(string)
   for(i in 1:floor(chars/n)) {
@@ -21,13 +12,14 @@ add_newline <- function(x, n) {
   return(string)
 }
 
+data <- easy
 
 get_question <- function(data){
   
   data <- data %>% 
     filter(!is.na(clue)) %>% 
     slice(sample(nrow(.), 1))
-  data$new_clue = wrap_text(data$clue, 40)
+  data$new_clue = add_newline(data$clue, 40)
   
   
   clue_plot <- ggplot(data, aes(x = 1, y = 1)) +                       
@@ -66,15 +58,17 @@ get_question <- function(data){
 
 }
 
-all_clues <- read_csv("jeopardy_test/all_data.csv")
+all_clues <- read_csv("~/Documents/data/jeopardy_complete.csv")
 
-x <- all_clues %>% filter(str_detect(category, "\\bTV|\\bTELEV") & date >= '2014-01-01')
-dogs <- all_clues %>% filter(str_detect(category, "\\b"))
+x <- all_clues %>% filter(!is.na(clue))
+
+tv <- all_clues %>% filter(str_detect(category, "\\bTV|\\bTELEV") & date >= '2014-01-01')
 easy <- all_clues %>% filter(value == 1 & date >= "2014-01-01")
 
 
 get_question(x)
 get_question(easy)
 
-8:00 am Thursday
+
+
 
