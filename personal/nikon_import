@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -e
+
+d=$(date +%Y-%m-%d)
+
+cd /media/michael/driver_ext/pictures/dslr/JPGS/
+mkdir ./$d-$1
+cd ./$d-$1
+cp -v /media/michael/NIKON\ D5300/DCIM/100D5300/*.JPG ./
+exiftool '-filename<CreateDate' -d %Y%m%d_%H%M%S%%-c.%%le -r -ext JPG ./
+
+cd /media/michael/driver_ext/pictures/dslr/RAW/
+mkdir ./$d-$1
+cd ./$d-$1
+cp -v /media/michael/NIKON\ D5300/DCIM/100D5300/*.NEF ./
+
+exiftool '-filename<CreateDate' -d %Y%m%d_%H%M%S%%-c.%%le -r -ext NEF ./

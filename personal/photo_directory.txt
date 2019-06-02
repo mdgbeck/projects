@@ -1,0 +1,27 @@
+/dslr
+    contains two folders for savings files from non-phone cameras
+    import with nikon_import bash script to rename pictures and create correct folders
+    usage ~/bin/nikon_import AlbumName creates correct folders and copies pictures to new folders
+    /JPGS
+        contains all jpgs taken from non-phone cameras
+        each upload from memory card is an album
+    /RAW
+        contains all RAW files for editing in darktable
+        each upload from memory card is an album
+
+/phone
+    contain folders for photo dumps from phones as well as import_jpgs folder for photos to be edited in darktable as well
+    /imported_jpgs
+        folder to contain jpgs and edit data for photos from phones
+        separate albums for each upload to darktable
+    /mike_phone
+        photo dump from mike's phones
+    /sarah_phone
+        photo dump from sarah's phones
+
+/prints
+    contains the edited pictures that are printed and added to physical albums as well as backed up on amazon
+
+/wedding
+    contains photos from our wedding
+    will likely create new folder for other photos taken by a professional / sent to us and this will be a subfolder
