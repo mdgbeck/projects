@@ -22,6 +22,8 @@
 /prints
     contains the edited pictures that are printed and added to physical albums as well as backed up on amazon
 
+/exports
+    files exported and uploaded to amazon, but waiting to be printed. move to prints once printed
 /wedding
     contains photos from our wedding
     will likely create new folder for other photos taken by a professional / sent to us and this will be a subfolder
