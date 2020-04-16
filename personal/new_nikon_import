@@ -1,0 +1,32 @@
+#!/bin/bash
+
+set -e
+
+d=$(date +%Y-%m-%d)
+exdir=/media/michael/blue_wd/pictures/dslr/
+sddir="/media/michael/NIKON D5300/DCIM/100D5300/"
+
+# import jpgs
+cd $exdir/JPGS/
+mkdir ./$d-$1
+cd ./$d-$1
+cp -v "$sddir"/*.JPG ./
+exiftool '-filename<CreateDate' -d %Y%m%d_%H%M%S%%-c.%%le -r -ext JPG ./
+
+# import nef raw files
+cd $exdir/RAW/
+mkdir ./$d-$1
+cd ./$d-$1
+cp -v "$sddir"/*.NEF ./
+exiftool '-filename<CreateDate' -d %Y%m%d_%H%M%S%%-c.%%le -r -ext NEF ./
+
+# import movies
+cd $exdir
+cd ../../videos
+mkdir ./$d-$1
+cd ./$d-$1
+cp -v "$sddir"/*.MOV ./
+
+# sync external drive with raw folder on computer
+
+rsync -a --info=progress2 $exdir/RAW/ /home/michael/Documents/dslr/RAW/
