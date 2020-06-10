@@ -1,0 +1,37 @@
+#!/bin/bash
+
+set -e
+
+recdir=/home/michael/Documents/website2/content/recipes/
+index_ignore='images|*.css|index.html'
+
+# sync recipes from category folders to all folder
+cd $recdir
+rsync -a --exclude 'index.html' \
+    baking/ \
+    beef/ \
+    breakfast/ \
+    chicken/ \
+    pork/ \
+    seafood/ \
+    vegetables/ \
+    all/
+
+# create index.html dir in each folder
+tree baking/ -HD '.' -L 1 --noreport --charset utf-8 \
+    -I "$index_ignore" --timefmt '%Y-%m-%d' > baking/index.html
+tree beef/ -HD '.' -L 1 --noreport --charset utf-8 \
+    -I "$index_ignore" --timefmt '%Y-%m-%d' > beef/index.html
+tree breakfast/ -HD '.' -L 1 --noreport --charset utf-8 \
+    -I "$index_ignore" --timefmt '%Y-%m-%d' > breakfast/index.html
+tree chicken/ -HD '.' -L 1 --noreport --charset utf-8 \
+    -I "$index_ignore" --timefmt '%Y-%m-%d' > chicken/index.html
+tree pork/ -HD '.' -L 1 --noreport --charset utf-8 \
+    -I "$index_ignore" --timefmt '%Y-%m-%d' > pork/index.html
+tree seafood/ -HD '.' -L 1 --noreport --charset utf-8 \
+    -I "$index_ignore" --timefmt '%Y-%m-%d' > seafood/index.html
+tree vegetables/ -HD '.' -L 1 --noreport --charset utf-8 \
+    -I "$index_ignore" --timefmt '%Y-%m-%d' > vegetables/index.html
+tree all/ -HD '.' -L 1 --noreport --charset utf-8 \
+    -I "$index_ignore" --timefmt '%Y-%m-%d' > all/index.html
+
