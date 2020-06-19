@@ -3,7 +3,7 @@
 set -e
 
 recdir=/home/michael/Documents/website2/content/recipes/
-index_ignore='images|*.css|index.html'
+index_ignore='images|*.css|index.html|template.html'
 
 # sync recipes from category folders to all folder
 cd $recdir
@@ -14,6 +14,8 @@ rsync -a --exclude 'index.html' \
     chicken/ \
     pork/ \
     seafood/ \
+    sides_sauces_misc/ \
+    soups_salads/ \
     vegetables/ \
     all/
 
@@ -30,8 +32,16 @@ tree pork/ -HD '.' -L 1 --noreport --charset utf-8 \
     -I "$index_ignore" --timefmt '%Y-%m-%d' > pork/index.html
 tree seafood/ -HD '.' -L 1 --noreport --charset utf-8 \
     -I "$index_ignore" --timefmt '%Y-%m-%d' > seafood/index.html
+tree sides_sauces_misc -HD '.' -L 1 --noreport --charset utf-8 \
+    -I "$index_ignore" --timefmt '%Y-%m-%d' > sides_sauces_misc/index.html
+tree soups_salads -HD '.' -L 1 --noreport --charset utf-8 \
+    -I "$index_ignore" --timefmt '%Y-%m-%d' > soups_salads/index.html
 tree vegetables/ -HD '.' -L 1 --noreport --charset utf-8 \
     -I "$index_ignore" --timefmt '%Y-%m-%d' > vegetables/index.html
 tree all/ -HD '.' -L 1 --noreport --charset utf-8 \
     -I "$index_ignore" --timefmt '%Y-%m-%d' > all/index.html
+tree products/ -HD '.' -L 1 --noreport --charset utf-8 \
+    -I "$index_ignore" --timefmt '%Y-%m-%d' > products/index.html
+tree -HD '.' -L 1 --noreport --charset utf-8 \
+    -I "$index_ignore" --timefmt '%Y-%m-%d' > index.html
 
