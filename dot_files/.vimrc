@@ -1,13 +1,13 @@
-" first vimrc file
-
 " add vim-plug
 " Plugins will be downloaded under the specified directory.
 call plug#begin('~/.vim/plugged')
 
 " Declare the list of plugins.
 Plug 'tpope/vim-sensible'
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-repeat'
+Plug 'chriskempson/base16-vim'
 Plug 'junegunn/seoul256.vim'
-Plug 'morhetz/gruvbox'
 Plug 'itchyny/lightline.vim'
 Plug 'scrooloose/nerdtree'
 Plug 'ajh17/VimCompletesMe'
@@ -16,18 +16,27 @@ Plug 'mattn/emmet-vim', { 'for': ['html', 'xml'] }
 " List ends here. Plugins become visible to Vim after this call.
 call plug#end()
 
+" add true color support
+if (has("termguicolors"))
+    set termguicolors
+endif
+
 " set color to gruvbox
-let g:gruvbox_contrast_dark = 'hard'
-set background=dark
-colo gruvbox
+colo base16-gruvbox-dark-pale 
 
 " set lightline color
 let g:lightline = {'colorscheme': 'seoul256'}
+
+
 " enable syntax processing
 syntax enable
 
 " display line numbers
 set number
+set relativenumber
+
+" remove underline from current line number
+hi CursorLineNr cterm=bold
 
 " display command in corner
 set showcmd
@@ -70,16 +79,11 @@ nnoremap _ ddkP
 " map ctrl d to delete current line in insert mode
 inoremap <c-d> <esc>ddi
 
-" map ctrl i to upper
-noremap <c-u> viwUlel
-inoremap <c-u> <esc>viwU<esc>leli
 
 nnoremap <leader>ev :split $MYVIMRC<cr>
 nnoremap <leader>sv :source $MYVIMRC<cr>
 
 " place current work in quotes
-nnoremap <leader>" viw<esc>a"<esc>bi"<esc>lel
-nnoremap <leader>' viw<esc>a'<esc>bi'<esc>lel
 
 
 nnoremap <leader>w <c-w>w
@@ -87,11 +91,13 @@ nnoremap <leader>w <c-w>w
 iabbrev adn and
 iabbrev @@ mdgbeck@gmail.com
 
-vnoremap <leader>' <esc>`<i'<esc>`>i'<esc>
-vnoremap <leader>" <esc>`<i"<esc>`>i"<esc>
 
 inoremap jk <esc>
 vnoremap jk <esc>  
+
+" add html tag on both sides of list
+vnoremap <leader>l I<li><esc><c-v>`>$A</li><esc>
+
 
 " html features
 
@@ -103,24 +109,10 @@ augroup filetype_html
         \ softtabstop=2
         \ expandtab
     autocmd FileType html nnoremap <buffer> <localleader>f Vatzf
+    autocmd FileType html iabbrev <buffer> jalepeno jalepe&ntilde;o
+    autocmd FileType html iabbrev <buffer> Jalepeno Jalepe&ntilde;o
+    autocmd FileType html iabbrev <buffer> saute saut&eacute;
+    autocmd FileType html iabbrev <buffer> Saute Saut&eacute;
 augroup END
 
-
-
-
-" python features
-augroup filetype_python
-    autocmd!
-    autocmd FileType python nnoremap <buffer> <localleader>c I#<esc>
-    autocmd FileType python iabbrev <buffer> iff if:<left>
-augroup END
-
-" operator mappings from book
-" sets p to select in paranthesis
-onoremap p i( 
-
-" inside next / last paranthesis
-onoremap in( :<c-u>normal! f(vi(<cr>
-onoremap il( :<c-u>normal! F)vi(<cr>
-
-onoremap ih :<c-u>execute "normal! ?^==\\+$\r:nohlsearch\rkvg_"<cr>
+set termwinkey=<space>
