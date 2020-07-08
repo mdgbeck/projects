@@ -6,27 +6,50 @@ call plug#begin('~/.vim/plugged')
 Plug 'tpope/vim-sensible'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-repeat'
+Plug 'tpope/vim-commentary'
 Plug 'chriskempson/base16-vim'
 Plug 'junegunn/seoul256.vim'
-Plug 'itchyny/lightline.vim'
 Plug 'scrooloose/nerdtree'
 Plug 'ajh17/VimCompletesMe'
+Plug 'sillybun/vim-repl'
+Plug 'wincent/terminus'
 Plug 'mattn/emmet-vim', { 'for': ['html', 'xml'] }
 
 " List ends here. Plugins become visible to Vim after this call.
 call plug#end()
+
+nnoremap <leader>q <c-w>w
+" let g:sendtorepl_invoke_key = "<leader>e"
+
+let g:repl_program = {
+    \ 'python': 'ipython3'
+    \}
 
 " add true color support
 if (has("termguicolors"))
     set termguicolors
 endif
 
-" set color to gruvbox
-colo base16-gruvbox-dark-pale 
+if &background ==# 'dark'
+    colo base16-gruvbox-dark-pale
+else
+    " colo base16-atelier-dune-light
+    colo base16-solarized-light
+endif
 
-" set lightline color
-let g:lightline = {'colorscheme': 'seoul256'}
 
+set statusline=
+set statusline+=%#PmenuSel#
+set statusline+=%#LineNr#
+set statusline+=\ %f
+set statusline+=%m\
+set statusline+=%=
+set statusline+=%#CursorColumn#
+set statusline+=\ %y
+set statusline+=\ %{&fileencoding?&fileencoding:&encoding}
+set statusline+=\[%{&fileformat}\]
+set statusline+=\ %p%%
+set statusline+=\ %l:%c
 
 " enable syntax processing
 syntax enable
@@ -78,7 +101,7 @@ nnoremap _ ddkP
 
 " map ctrl d to delete current line in insert mode
 inoremap <c-d> <esc>ddi
-
+inoremap <c-f> <esc><c-w>za
 
 nnoremap <leader>ev :split $MYVIMRC<cr>
 nnoremap <leader>sv :source $MYVIMRC<cr>
@@ -86,7 +109,6 @@ nnoremap <leader>sv :source $MYVIMRC<cr>
 " place current work in quotes
 
 
-nnoremap <leader>w <c-w>w
 
 iabbrev adn and
 iabbrev @@ mdgbeck@gmail.com
@@ -108,11 +130,31 @@ augroup filetype_html
         \ shiftwidth=2
         \ softtabstop=2
         \ expandtab
-    autocmd FileType html nnoremap <buffer> <localleader>f Vatzf
     autocmd FileType html iabbrev <buffer> jalepeno jalepe&ntilde;o
     autocmd FileType html iabbrev <buffer> Jalepeno Jalepe&ntilde;o
     autocmd FileType html iabbrev <buffer> saute saut&eacute;
     autocmd FileType html iabbrev <buffer> Saute Saut&eacute;
 augroup END
 
-set termwinkey=<space>
+augroup filetype_python
+    autocmd FileType python nnoremap <leader>c 0i#<space><esc>
+augroup END
+
+nnoremap <leader>r :REPLToggle<Cr>
+
+" set terminal settings
+" set termwinkey=<space>
+nnoremap <leader>t :term<cr>
+
+nnoremap <leader>' :execute "normal \<Plug>Ysurround$'"<cr>
+nnoremap <leader>" :execute "normal \<Plug>Ysurround$\""<cr>
+nnoremap <leader>) :execute "normal \<Plug>Ysurround$)"<cr>
+nnoremap <leader>( :execute "normal \<Plug>Ysurround$("<cr>
+
+nnoremap <leader>h ^
+nnoremap <leader>H 0
+nnoremap <leader>l $
+
+nnoremap <leader>n :set background=light<cr>:source $MYVIMRC<cr>
+nnoremap <leader>b :set background=dark<cr>:source $MYVIMRC<cr>
+

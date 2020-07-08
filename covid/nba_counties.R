@@ -59,6 +59,8 @@ nba <- nba %>%
     new_deaths = deaths - death_lead,
     new_deaths_roll7 = rollmean(new_deaths, 7, align = "left", fill = 'NA'),
     new_deaths_cap_roll7 = new_deaths_roll7 / pop,
+    new_deaths_lag = lag(deaths, 14),
+    new_deaths_lag_roll7 = rollmean(new_deaths, 7, alight = "left", fill = 'NA'),
     orange_county = case_when(city == "Orlando" ~ "Orange County")
   )
 
@@ -86,6 +88,23 @@ nba %>%
   theme_mdgr() +
   facet_wrap(~city, scales = 'free') +
   labs(y = "Deaths Per Day")
+
+nba %>% 
+  ggplot(aes(x = date)) +
+  geom_line(aes(y = new_deaths_lag_roll7), color = 'red') +
+  geom_line(aes(y = new_cases_roll7 / 100), color = 'blue') + 
+  theme_mdgr() +
+  facet_wrap(~city, scales = 'free') +
+  labs(y = "Deaths Per Day")
+
+nba %>% 
+  ggplot(aes(x = date)) +
+  geom_line(aes(y = lag(new_deaths_roll7, 14)), color = 'red') +
+  geom_line(aes(y = new_cases_roll7 / 100), color = 'blue') + 
+  theme_mdgr() +
+  facet_wrap(~city, scales = 'free') +
+  labs(y = "Deaths Per Day")
+
 
 nba %>% 
   filter(city != 'New York City') %>% 
