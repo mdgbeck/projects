@@ -1,29 +1,32 @@
-" add vim-plug
-" Plugins will be downloaded under the specified directory.
-call plug#begin('~/.vim/plugged')
 
-" Declare the list of plugins.
-Plug 'tpope/vim-sensible'
-Plug 'tpope/vim-surround'
-Plug 'tpope/vim-repeat'
-Plug 'tpope/vim-commentary'
-Plug 'chriskempson/base16-vim'
-Plug 'junegunn/seoul256.vim'
-Plug 'scrooloose/nerdtree'
-Plug 'ajh17/VimCompletesMe'
-Plug 'sillybun/vim-repl'
-Plug 'wincent/terminus'
-Plug 'mattn/emmet-vim', { 'for': ['html', 'xml'] }
+    " add vim-plug
+    " Plugins will be downloaded under the specified directory.
+    call plug#begin('~/.vim/plugged')
 
-" List ends here. Plugins become visible to Vim after this call.
-call plug#end()
+    " Declare the list of plugins.
+    Plug 'tpope/vim-sensible'
+    Plug 'tpope/vim-surround'
+    Plug 'tpope/vim-repeat'
+    Plug 'tpope/vim-commentary'
+    Plug 'chriskempson/base16-vim'
+    Plug 'junegunn/seoul256.vim'
+    Plug 'scrooloose/nerdtree'
+    Plug 'ajh17/VimCompletesMe'
+    Plug 'sillybun/vim-repl'
+    Plug 'wincent/terminus'
+    Plug 'mattn/emmet-vim', { 'for': ['html', 'xml'] }
 
-nnoremap <leader>q <c-w>w
-" let g:sendtorepl_invoke_key = "<leader>e"
+    " List ends here. Plugins become visible to Vim after this call.
+    call plug#end()
 
-let g:repl_program = {
-    \ 'python': 'ipython3'
-    \}
+    " set global leader key
+    nnoremap <SPACE> <Nop>
+    let mapleader=" "
+    let localleader="\\"
+
+    nnoremap <leader>d :NERDTreeToggle<cr>
+    nnoremap <leader>q <c-w>w
+    " let g:sendtorepl_invoke_key = "<leader>e"
 
 " add true color support
 if (has("termguicolors"))
@@ -57,6 +60,7 @@ syntax enable
 " display line numbers
 set number
 set relativenumber
+nnoremap <leader>m :set relativenumber!<cr>
 
 " remove underline from current line number
 hi CursorLineNr cterm=bold
@@ -84,10 +88,6 @@ set autoindent
 set splitbelow
 set splitright
 
-" set global leader key
-nnoremap <SPACE> <Nop>
-let mapleader=" "
-let localleader="\\"
 
 " set emmet leaderkey
 let g:user_emmet_leader_key=','
@@ -103,8 +103,8 @@ nnoremap _ ddkP
 inoremap <c-d> <esc>ddi
 inoremap <c-f> <esc><c-w>za
 
-nnoremap <leader>ev :split $MYVIMRC<cr>
-nnoremap <leader>sv :source $MYVIMRC<cr>
+nnoremap <leader>ve :split $MYVIMRC<cr>
+nnoremap <leader>vs :source $MYVIMRC<cr>
 
 " place current work in quotes
 
@@ -114,8 +114,8 @@ iabbrev adn and
 iabbrev @@ mdgbeck@gmail.com
 
 
-inoremap jk <esc>
-vnoremap jk <esc>  
+" inoremap jk <esc>
+" vnoremap jk <esc>  
 
 " add html tag on both sides of list
 vnoremap <leader>l I<li><esc><c-v>`>$A</li><esc>
@@ -140,11 +140,23 @@ augroup filetype_python
     autocmd FileType python nnoremap <leader>c 0i#<space><esc>
 augroup END
 
-nnoremap <leader>r :REPLToggle<Cr>
+augroup filetype_r
+    autocmd FileType r inoremap -- <space><-<space>
+    autocmd FileType r inoremap ,, <space>%>%<space>
+augroup END
+
+" commands to send code to console
+nnoremap <silent> <leader>rr :execute "normal Vgg<space>w"<cr>
+nnoremap <silent> <leader>re :execute "normal V{<space>w"<cr>
+nnoremap <silent> <leader>e :execute "normal {V}<space>w"<cr>
+
+nnoremap <leader>= <c-w>5+
+nnoremap <leader>- <c-w>5-
+nnoremap <leader>t :REPLToggle<Cr>
 
 " set terminal settings
 " set termwinkey=<space>
-nnoremap <leader>t :term<cr>
+" nnoremap <leader>t :term<cr>
 
 nnoremap <leader>' :execute "normal \<Plug>Ysurround$'"<cr>
 nnoremap <leader>" :execute "normal \<Plug>Ysurround$\""<cr>
@@ -158,3 +170,21 @@ nnoremap <leader>l $
 nnoremap <leader>n :set background=light<cr>:source $MYVIMRC<cr>
 nnoremap <leader>b :set background=dark<cr>:source $MYVIMRC<cr>
 
+" set in plugin files since re sourcing vimrc breaks call
+" let g:repl_program = {
+"     \   'python': 'ipython3',
+"     \   'r': 'R --no-save',
+"     \ }
+
+" let g:repl_exit_commands = {
+"     \   'radian': 'q()'
+    \ }
+" let NERDTreeMapActivateNode = 'e'
+" let NERDTreeMapOpenExpl = 'E'
+
+" make jumps larger than 3 counts as jumps
+nnoremap <expr> j v:count ? (v:count > 3 ? "m'" . v:count : '') . 'j' : 'gj'
+nnoremap <expr> k v:count ? (v:count > 3 ? "m'" . v:count : '') . 'k' : 'gk'
+
+nnoremap <leader>p yy``P
+nnoremap <leader>c :cd %:h<cr>
