@@ -188,3 +188,4 @@ nnoremap <expr> k v:count ? (v:count > 3 ? "m'" . v:count : '') . 'k' : 'gk'
 
 nnoremap <leader>p yy``P
 nnoremap <leader>c :cd %:h<cr>
+" test comment
