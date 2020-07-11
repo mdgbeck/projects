@@ -1,32 +1,32 @@
 
-    " add vim-plug
-    " Plugins will be downloaded under the specified directory.
-    call plug#begin('~/.vim/plugged')
+" add vim-plug
+" Plugins will be downloaded under the specified directory.
+call plug#begin('~/.vim/plugged')
 
-    " Declare the list of plugins.
-    Plug 'tpope/vim-sensible'
-    Plug 'tpope/vim-surround'
-    Plug 'tpope/vim-repeat'
-    Plug 'tpope/vim-commentary'
-    Plug 'chriskempson/base16-vim'
-    Plug 'junegunn/seoul256.vim'
-    Plug 'scrooloose/nerdtree'
-    Plug 'ajh17/VimCompletesMe'
-    Plug 'sillybun/vim-repl'
-    Plug 'wincent/terminus'
-    Plug 'mattn/emmet-vim', { 'for': ['html', 'xml'] }
+" Declare the list of plugins.
+Plug 'tpope/vim-sensible'
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-repeat'
+Plug 'tpope/vim-commentary'
+Plug 'chriskempson/base16-vim'
+Plug 'junegunn/seoul256.vim'
+Plug 'scrooloose/nerdtree'
+Plug 'ajh17/VimCompletesMe'
+Plug 'sillybun/vim-repl'
+Plug 'wincent/terminus'
+Plug 'mattn/emmet-vim', { 'for': ['html', 'xml'] }
 
-    " List ends here. Plugins become visible to Vim after this call.
-    call plug#end()
+" List ends here. Plugins become visible to Vim after this call.
+call plug#end()
 
-    " set global leader key
-    nnoremap <SPACE> <Nop>
-    let mapleader=" "
-    let localleader="\\"
+" set global leader key
+nnoremap <SPACE> <Nop>
+let mapleader=" "
+let localleader="\\"
 
-    nnoremap <leader>d :NERDTreeToggle<cr>
-    nnoremap <leader>q <c-w>w
-    " let g:sendtorepl_invoke_key = "<leader>e"
+nnoremap <leader>d :NERDTreeToggle<cr>
+nnoremap <leader>q <c-w>w
+" let g:sendtorepl_invoke_key = "<leader>e"
 
 " add true color support
 if (has("termguicolors"))
