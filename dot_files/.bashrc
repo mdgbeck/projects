@@ -57,7 +57,7 @@ if [ -n "$force_color_prompt" ]; then
 fi
 
 if [ "$color_prompt" = yes ]; then
-    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]$ '
 else
     PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
 fi
@@ -124,3 +124,26 @@ alias gcm='git commit --message'
 alias gd='git diff'
 alias gs='git status'
 alias gpom='git push origin master'
+
+# add bash alias
+alias p3='python3'
+
+
+# alias for recipe directory
+alias wr='cd ~/Documents/website2/content/recipes/'
+
+# Base16 Shell
+BASE16_SHELL="$HOME/.config/base16-shell/"
+[ -n "$PS1" ] && \
+    [ -s "$BASE16_SHELL/profile_helper.sh" ] && \
+        eval "$("$BASE16_SHELL/profile_helper.sh")"
+
+# enable vim editing mode
+set -o vi
+
+# sets vim term to use beam not block
+[[ $TERM == *xter* ]] && echo -e -n "\x1b[\x35 q"
+
+alias c='clear'
+alias p='pwd'
+alias pi='pipenv shell'
