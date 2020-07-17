@@ -3,20 +3,21 @@
 " Plugins will be downloaded under the specified directory.
 call plug#begin('~/.vim/plugged')
 
-" Declare the list of plugins.
+" " Declare the list of plugins.
 Plug 'tpope/vim-sensible'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-commentary'
 Plug 'chriskempson/base16-vim'
-Plug 'junegunn/seoul256.vim'
 Plug 'scrooloose/nerdtree'
+" Plug 'ycm-core/YouCompleteMe'
 Plug 'ajh17/VimCompletesMe'
-Plug 'sillybun/vim-repl'
-Plug 'wincent/terminus'
+Plug 'tmsvg/pear-tree'
+Plug 'wincent/terminus', {'frozen': 1}
+Plug 'sillybun/vim-repl', { 'frozen': 1}
 Plug 'mattn/emmet-vim', { 'for': ['html', 'xml'] }
 
-" List ends here. Plugins become visible to Vim after this call.
+" " List ends here. Plugins become visible to Vim after this call.
 call plug#end()
 
 " set global leader key
@@ -33,13 +34,16 @@ if (has("termguicolors"))
     set termguicolors
 endif
 
+" switched for easy toggle
 if &background ==# 'dark'
-    colo base16-gruvbox-dark-pale
-else
     " colo base16-atelier-dune-light
     colo base16-solarized-light
+else
+    colo base16-gruvbox-dark-pale
 endif
 
+nnoremap <leader>b :set background=light<cr>:source $MYVIMRC<cr>
+nnoremap <leader>n :set background=dark<cr>:source $MYVIMRC<cr>
 
 set statusline=
 set statusline+=%#PmenuSel#
@@ -74,12 +78,6 @@ set cursorline
 " change search settings
 set incsearch " search as characters are typed
 
-" set tab behavior
-set tabstop=4 " number of displayed spaces when reading
-set softtabstop=4 " number of inserted spaces when editing
-set shiftwidth=4
-set expandtab " sets tab to use spaces
-
 " set indention settings
 set smartindent
 set autoindent
@@ -88,7 +86,23 @@ set autoindent
 set splitbelow
 set splitright
 
+" omni completion
+filetype plugin on
+" set omnifunc=syntaxcomplete#Complete
 
+" function that remove whitespace on saves
+fun! <SID>StripTrailingWhitespaces()
+    let l = line(".")
+    let c = col(".")
+    keepp %s/\s\+$//e
+    call cursor(l, c)
+endfun
+
+augroup whitespace
+    autocmd!
+    autocmd FileType php,ruby,python,r autocmd BufWritePre <buffer> :call <SID>StripTrailingWhitespaces()
+augroup end
+    
 " set emmet leaderkey
 let g:user_emmet_leader_key=','
 
@@ -103,16 +117,11 @@ nnoremap _ ddkP
 inoremap <c-d> <esc>ddi
 inoremap <c-f> <esc><c-w>za
 
-nnoremap <leader>ve :split $MYVIMRC<cr>
+nnoremap <leader>vv :split $MYVIMRC<cr>
 nnoremap <leader>vs :source $MYVIMRC<cr>
-
-" place current work in quotes
-
-
 
 iabbrev adn and
 iabbrev @@ mdgbeck@gmail.com
-
 
 " inoremap jk <esc>
 " vnoremap jk <esc>  
@@ -125,7 +134,7 @@ vnoremap <leader>l I<li><esc><c-v>`>$A</li><esc>
 
 augroup filetype_html
     autocmd!
-    autocmd FileType html setlocal 
+    autocmd FileType html setlocal
         \ tabstop=2
         \ shiftwidth=2
         \ softtabstop=2
@@ -137,22 +146,51 @@ augroup filetype_html
 augroup END
 
 augroup filetype_python
-    autocmd FileType python nnoremap <leader>c 0i#<space><esc>
+    autocmd!
+    autocmd FileType python syntax keyword PythonBuiltin NA 
+    autocmd FileType python setlocal tabstop=4
+    autocmd FileType python setlocal shiftwidth=4
+    autocmd FileType python setlocal softtabstop=4
+    autocmd FileType python setlocal expandtab
+    autocmd FileType python nnoremap <leader>rw <c-w>j.to_csv(r'~/data_view.csv')<home>
+    autocmd FileType python nnoremap <leader>rq <c-w>j<c-r>to_csv<cr><cr><c-w>k
 augroup END
 
 augroup filetype_r
+    autocmd!
+    autocmd FileType r setlocal 
+        \ tabstop=2
+        \ shiftwidth=2
+        \ softtabstop=2
+        \ expandtab
     autocmd FileType r inoremap -- <space><-<space>
     autocmd FileType r inoremap ,, <space>%>%<space>
+    autocmd FileType r nnoremap <leader>rw <c-w>j<esc>i<space>%>%<space>write_csv("~/data_view.csv")<esc>0i
+augroup END
+
+augroup allfiles
+    autocmd!
+    " sets files with no extension to be treated as text
+    " allows resourcing of vimrc and files keeping their settings
+    " if tab behavior set outside group sets all filetypes to that on resource
+    autocmd BufNewFile,BufRead * if expand('%:t') !~ '\.' | set ft=text | endif
+    autocmd FileType text,sh setlocal tabstop=4
+    autocmd FileType text,sh setlocal shiftwidth=4
+    autocmd FileType text,sh setlocal softtabstop=4
+    autocmd FileType text,sh setlocal expandtab
 augroup END
 
 " commands to send code to console
-nnoremap <silent> <leader>rr :execute "normal Vgg<space>w"<cr>
+nnoremap <silent> <leader>rr :execute "normal }Vgg<space>w"<cr>
 nnoremap <silent> <leader>re :execute "normal V{<space>w"<cr>
 nnoremap <silent> <leader>e :execute "normal {V}<space>w"<cr>
 
+nnoremap <leader>rv :! libreoffice ~/data_view.csv &<cr><cr>
 nnoremap <leader>= <c-w>5+
 nnoremap <leader>- <c-w>5-
 nnoremap <leader>t :REPLToggle<Cr>
+nnoremap <leader>T :term<cr>
+
 
 " set terminal settings
 " set termwinkey=<space>
@@ -167,8 +205,6 @@ nnoremap <leader>h ^
 nnoremap <leader>H 0
 nnoremap <leader>l $
 
-nnoremap <leader>n :set background=light<cr>:source $MYVIMRC<cr>
-nnoremap <leader>b :set background=dark<cr>:source $MYVIMRC<cr>
 
 " set in plugin files since re sourcing vimrc breaks call
 " let g:repl_program = {
@@ -183,9 +219,15 @@ nnoremap <leader>b :set background=dark<cr>:source $MYVIMRC<cr>
 " let NERDTreeMapOpenExpl = 'E'
 
 " make jumps larger than 3 counts as jumps
-nnoremap <expr> j v:count ? (v:count > 3 ? "m'" . v:count : '') . 'j' : 'gj'
-nnoremap <expr> k v:count ? (v:count > 3 ? "m'" . v:count : '') . 'k' : 'gk'
+nnoremap <expr> j v:count ? (v:count > 2 ? "m'" . v:count : '') . 'j' : 'gj'
+nnoremap <expr> k v:count ? (v:count > 2 ? "m'" . v:count : '') . 'k' : 'gk'
 
 nnoremap <leader>p yy``P
 nnoremap <leader>c :cd %:h<cr>
-" test comment
+
+tnoremap <F1> <c-w>w
+inoremap <F1> <esc><c-w>w
+nnoremap <F1> <c-w>w
+
+let g:repl_height = 20
+

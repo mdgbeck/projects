@@ -7,7 +7,7 @@ nba_base <- read_csv("nba_cities.csv")
 
 base_url <- "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/"
 
-dates <- seq.Date(ymd('20200401'), today() - 1, by = 'day') %>% 
+dates <- seq.Date(ymd('20200401'), today() - 1, by = 'day') %>%
   format('%m-%d-%Y')
 
 
@@ -16,8 +16,8 @@ urls <- paste0(base_url, dates, ".csv")
 dat <- map_dfr(urls, read_csv, col_types = "cccccddddddcdd", .id = "source", )
 
 # remove spaces since some cities don't have proper space alignment
-covid_data <- dat %>% 
-  janitor::clean_names() %>% 
+covid_data <- dat %>%
+  janitor::clean_names() %>%
   mutate(
     pop = confirmed / (incidence_rate / 100000),
     perc = confirmed / pop,
@@ -25,28 +25,27 @@ covid_data <- dat %>%
     combined_key2 = str_replace_all(combined_key, " ", ""),
     source = as.numeric(source),
     date = today() - -1*(source - length(urls))
-  ) %>% 
-  group_by(combined_key2) %>% 
+  ) %>%
+  group_by(combined_key2) %>%
   mutate(pop = min(pop, na.rm = TRUE),
          perc = confirmed / pop)
 
-
-nba <- nba_base %>% 
+nba <- nba_base %>%
   mutate(
     combined_key2 = str_replace_all(
       paste(county, state, country, sep=","), " ", "")
-  ) %>% 
+  ) %>%
   left_join(covid_data)
 
 # test to see data for each date each team
-y <- nba %>% 
+y <- nba %>%
   count(city)
 n_distinct(y$n)
 
 # add rolling means
-nba <- nba %>% 
-  arrange(city, desc(source)) %>% 
-  group_by(city) %>% 
+nba <- nba %>%
+  arrange(city, desc(source)) %>%
+  group_by(city) %>%
   mutate(
     case_lead = lead(confirmed),
     new_cases = confirmed - case_lead,
@@ -64,15 +63,14 @@ nba <- nba %>%
     orange_county = case_when(city == "Orlando" ~ "Orange County")
   )
 
-nba %>% 
-  #filter(city != 'New York City') %>% 
+nba %>%
+  #filter(city != 'New York City') %>%
   ggplot(aes(date, new_cases_roll7)) +
   geom_line(aes(color = city), size = .5) +
   theme_mdgr()
 
-
-nba %>% 
-  filter(city != 'New York City') %>% 
+nba %>%
+  filter(city != 'New York City') %>%
   ggplot(aes(date, new_deaths_cap_roll7)) +
   geom_line(aes(group = city), size = .5, color = "gray65") +
   geom_line(data = filter(nba, city == "Orlando"), color = "orange") +
@@ -80,45 +78,44 @@ nba %>%
   geom_line(data = filter(nba, city == "Phoenix"), color = "red") +
   theme_mdgr()
 
-
-nba %>% 
+nba %>%
   ggplot(aes(x = date)) +
   geom_line(aes(y = new_deaths_roll7), color = 'red') +
-  geom_line(aes(y = new_cases_roll7 / 100), color = 'blue') + 
+  geom_line(aes(y = new_cases_roll7 / 100), color = 'blue') +
   theme_mdgr() +
   facet_wrap(~city, scales = 'free') +
   labs(y = "Deaths Per Day")
 
-nba %>% 
+nba %>%
   ggplot(aes(x = date)) +
   geom_line(aes(y = new_deaths_lag_roll7), color = 'red') +
-  geom_line(aes(y = new_cases_roll7 / 100), color = 'blue') + 
+  geom_line(aes(y = new_cases_roll7 / 100), color = 'blue') +
   theme_mdgr() +
   facet_wrap(~city, scales = 'free') +
   labs(y = "Deaths Per Day")
 
-nba %>% 
+nba %>%
   ggplot(aes(x = date)) +
   geom_line(aes(y = lag(new_deaths_roll7, 14)), color = 'red') +
-  geom_line(aes(y = new_cases_roll7 / 100), color = 'blue') + 
+  geom_line(aes(y = new_cases_roll7 / 100), color = 'blue') +
   theme_mdgr() +
   facet_wrap(~city, scales = 'free') +
   labs(y = "Deaths Per Day")
 
 
-nba %>% 
-  filter(city != 'New York City') %>% 
+nba %>%
+  filter(city != 'New York City') %>%
   ggplot(aes(x = date)) +
   geom_line(aes(y = new_deaths_roll7), color = 'red') +
-  geom_line(aes(y = new_cases_roll7 / 50), color = 'blue') + 
+  geom_line(aes(y = new_cases_roll7 / 50), color = 'blue') +
   theme_mdgr() +
   facet_wrap(~city)
 
-nba %>% 
-  filter(city != 'New York City') %>% 
+nba %>%
+  filter(city != 'New York City') %>%
   ggplot(aes(x = date)) +
   geom_line(aes(y = new_deaths_cap_roll7), color = 'red') +
-  geom_line(aes(y = new_cases_cap_roll7 / 100), color = 'blue') + 
+  geom_line(aes(y = new_cases_cap_roll7 / 100), color = 'blue') +
   theme_mdgr() +
   facet_wrap(~city) +
   theme(axis.text.y = element_blank())
