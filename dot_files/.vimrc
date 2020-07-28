@@ -129,6 +129,15 @@ iabbrev @@ mdgbeck@gmail.com
 " add html tag on both sides of list
 vnoremap <leader>l I<li><esc><c-v>`>$A</li><esc>
 
+" commands to write data files from csvs
+command! -nargs=1 Rdata1 execute 
+	\ "normal o<space>%>%<space>write_csv('~/.data/d1.csv')<esc>0i<args><esc><leader>w?d1.csv<cr>ddk"
+command! -nargs=1 Rdata2 execute 
+	\ "normal o<space>%>%<space>write_csv('~/.data/d2.csv')<esc>0i<args><esc><leader>w?d2.csv<cr>ddk"
+command! -nargs=1 Rdata3 execute 
+	\ "normal o<space>%>%<space>write_csv('~/.data/d3.csv')<esc>0i<args><esc><leader>w?d3.csv<cr>ddk"
+command! -nargs=1 Rdata4 execute 
+	\ "normal o<space>%>%<space>write_csv('~/.data/d4.csv')<esc>0i<args><esc><leader>w?d4.csv<cr>ddk"
 
 " html features
 
@@ -165,7 +174,12 @@ augroup filetype_r
         \ expandtab
     autocmd FileType r inoremap -- <space><-<space>
     autocmd FileType r inoremap ,, <space>%>%<space>
-    autocmd FileType r nnoremap <leader>rw <c-w>j<esc>i<space>%>%<space>write_csv("~/data_view.csv")<esc>0i
+    " autocmd FileType r nnoremap <leader>rw <c-w>j<esc>i<space>%>%<space>write_csv("~/data_view.csv")<esc>0i
+    autocmd FileType r nnoremap <leader>1 :Rdata1<space>
+    autocmd FileType r nnoremap <leader>2 :Rdata2<space>
+    autocmd FileType r nnoremap <leader>3 :Rdata3<space>
+    autocmd FileType r nnoremap <leader>4 :Rdata4<space>
+    " space-rq rewrites last dataframe
     autocmd FileType r nnoremap <leader>rq <c-w>j<c-r>write_csv<cr><c-w>k
 augroup END
 
@@ -181,12 +195,17 @@ augroup allfiles
     autocmd FileType text,sh setlocal expandtab
 augroup END
 
+
+
 " commands to send code to console
 nnoremap <silent> <leader>rr :execute "normal }Vgg<space>w"<cr>
 nnoremap <silent> <leader>re :execute "normal V{<space>w"<cr>
 nnoremap <silent> <leader>e :execute "normal {V}<space>w"<cr>
 
-nnoremap <leader>rv :! libreoffice ~/data_view.csv &<cr><cr>
+nnoremap <leader>r1 :! libreoffice ~/.data/d1.csv &<cr><cr>
+nnoremap <leader>r2 :! libreoffice ~/.data/d2.csv &<cr><cr>
+nnoremap <leader>r3 :! libreoffice ~/.data/d3.csv &<cr><cr>
+nnoremap <leader>r4 :! libreoffice ~/.data/d4.csv &<cr><cr>
 nnoremap <leader>= <c-w>5+
 nnoremap <leader>- <c-w>5-
 nnoremap <leader>t :REPLToggle<Cr>
