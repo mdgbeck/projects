@@ -166,6 +166,7 @@ augroup filetype_r
     autocmd FileType r inoremap -- <space><-<space>
     autocmd FileType r inoremap ,, <space>%>%<space>
     autocmd FileType r nnoremap <leader>rw <c-w>j<esc>i<space>%>%<space>write_csv("~/data_view.csv")<esc>0i
+    autocmd FileType r nnoremap <leader>rq <c-w>j<c-r>write_csv<cr><c-w>k
 augroup END
 
 augroup allfiles
