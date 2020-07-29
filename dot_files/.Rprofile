@@ -6,7 +6,7 @@ ls_env_dfs <- function(){
 
   d <- tibble(df = objs,
               class = map_chr(df, function(x) class(.GlobalEnv[[x]])[1])) %>% 
-    filter(class %in% c('data.frame', 'tbl_df')) %>% 
+    filter(class %in% c('data.frame', 'tbl_df', 'grouped_df')) %>% 
     mutate(nrows = map_int(df, function(x) nrow(.GlobalEnv[[x]])),
            ncols = map_int(df, function(x) ncol(.GlobalEnv[[x]])))
    
