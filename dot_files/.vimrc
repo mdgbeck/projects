@@ -129,7 +129,7 @@ iabbrev @@ mdgbeck@gmail.com
 " add html tag on both sides of list
 vnoremap <leader>l I<li><esc><c-v>`>$A</li><esc>
 
-" commands to write data files from csvs
+" commands to write data files to csvs
 command! -nargs=1 Rdata1 execute 
 	\ "normal o<space>%>%<space>write_csv('~/.data/d1.csv')<esc>0i<args><esc><leader>w?d1.csv<cr>ddk"
 command! -nargs=1 Rdata2 execute 
@@ -139,6 +139,14 @@ command! -nargs=1 Rdata3 execute
 command! -nargs=1 Rdata4 execute 
 	\ "normal o<space>%>%<space>write_csv('~/.data/d4.csv')<esc>0i<args><esc><leader>w?d4.csv<cr>ddk"
 
+command! -nargs=1 Pydata1 execute 
+	\ "normal o.to_csv(r'~/.data/d1.csv')<esc>^i<args><esc><leader>w?d1.csv<cr>ddk"
+command! -nargs=1 Pydata2 execute 
+	\ "normal o.to_csv(r'~/.data/d2.csv')<esc>^i<args><esc><leader>w?d2.csv<cr>ddk"
+command! -nargs=1 Pydata3 execute 
+	\ "normal o.to_csv(r'~/.data/d3.csv')<esc>^i<args><esc><leader>w?d3.csv<cr>ddk"
+command! -nargs=1 Pydata4 execute 
+	\ "normal o.to_csv(r'~/.data/d4.csv')<esc>^i<args><esc><leader>w?d4.csv<cr>ddk"
 " html features
 
 augroup filetype_html
@@ -161,7 +169,11 @@ augroup filetype_python
     autocmd FileType python setlocal shiftwidth=4
     autocmd FileType python setlocal softtabstop=4
     autocmd FileType python setlocal expandtab
-    autocmd FileType python nnoremap <leader>rw <c-w>j.to_csv(r'~/data_view.csv')<home>
+    " autocmd FileType python nnoremap <leader>rw <c-w>j.to_csv(r'~/data_view.csv')<home>
+    autocmd FileType python nnoremap <leader>1 :Pydata1<space>
+    autocmd FileType python nnoremap <leader>2 :Pydata2<space>
+    autocmd FileType python nnoremap <leader>3 :Pydata3<space>
+    autocmd FileType python nnoremap <leader>4 :Pydata4<space>
     autocmd FileType python nnoremap <leader>rq <c-w>j<c-r>to_csv<cr><cr><c-w>k
 augroup END
 
@@ -181,6 +193,11 @@ augroup filetype_r
     autocmd FileType r nnoremap <leader>4 :Rdata4<space>
     " space-rq rewrites last dataframe
     autocmd FileType r nnoremap <leader>rq <c-w>j<c-r>write_csv<cr><c-w>k
+    autocmd FileType r nnoremap <silent> <leader>rw 
+	\ :execute "normal Gols_env_dfs()<C-v><esc><space>wdd``"<cr>
+    autocmd FileType r nnoremap <silent> <leader>rd 
+	\ :execute "normal Gols_env_global()<C-v><esc><space>wdd``"<cr>
+
 augroup END
 
 augroup allfiles
