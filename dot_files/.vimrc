@@ -205,11 +205,12 @@ augroup allfiles
     " sets files with no extension to be treated as text
     " allows resourcing of vimrc and files keeping their settings
     " if tab behavior set outside group sets all filetypes to that on resource
+    autocmd BufNewFile,BufRead *.conf set syntax=text
     autocmd BufNewFile,BufRead * if expand('%:t') !~ '\.' | set ft=text | endif
-    autocmd FileType text,sh setlocal tabstop=4
-    autocmd FileType text,sh setlocal shiftwidth=4
-    autocmd FileType text,sh setlocal softtabstop=4
-    autocmd FileType text,sh setlocal expandtab
+    autocmd FileType text,sh,conf setlocal tabstop=4
+    autocmd FileType text,sh,conf  setlocal shiftwidth=4
+    autocmd FileType text,sh,conf  setlocal softtabstop=4
+    autocmd FileType text,sh,conf  setlocal expandtab
 augroup END
 
 
