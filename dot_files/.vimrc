@@ -206,14 +206,15 @@ augroup allfiles
     " allows resourcing of vimrc and files keeping their settings
     " if tab behavior set outside group sets all filetypes to that on resource
     autocmd BufNewFile,BufRead *.conf set syntax=text
-    autocmd BufNewFile,BufRead * if expand('%:t') !~ '\.' | set ft=text | endif
-    autocmd FileType text,sh,conf setlocal tabstop=4
-    autocmd FileType text,sh,conf  setlocal shiftwidth=4
-    autocmd FileType text,sh,conf  setlocal softtabstop=4
-    autocmd FileType text,sh,conf  setlocal expandtab
+    autocmd BufNewFile,BufRead * if expand('%:t') !~ '\.' | set ft=sh | endif
+    autocmd BufNewFile,BufRead *.bash_history nnoremap o "+yy
+    autocmd BufNewFile,BufRead *.bash_history nnoremap p ZQ
+    autocmd BufNewFile,BufRead *.bash_history :silent g/^$/d
+    autocmd FileType text,sh,conf,vim setlocal tabstop=4
+    autocmd FileType text,sh,conf,vim setlocal shiftwidth=4
+    autocmd FileType text,sh,conf,vim setlocal softtabstop=4
+    autocmd FileType text,sh,conf,vim setlocal expandtab
 augroup END
-
-
 
 " commands to send code to console
 nnoremap <silent> <leader>rr :execute "normal }Vgg<space>w"<cr>
