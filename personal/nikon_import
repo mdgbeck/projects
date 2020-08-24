@@ -39,5 +39,5 @@ fi
 
 # sync external drive with raw folder on computer
 
-echo "syncing external raw files to local files at" $locdir/RAW/
-rsync -a --info=progress2 $exdir/RAW/ $locdir/RAW/
+# echo "syncing external raw files to local files at" $locdir/RAW/
+# rsync -a --info=progress2 $exdir/RAW/ $locdir/RAW/
