@@ -169,6 +169,7 @@ augroup filetype_python
     autocmd FileType python setlocal shiftwidth=4
     autocmd FileType python setlocal softtabstop=4
     autocmd FileType python setlocal expandtab
+    autocmd FileType python setlocal textwidth=80
     " autocmd FileType python nnoremap <leader>rw <c-w>j.to_csv(r'~/data_view.csv')<home>
     autocmd FileType python nnoremap <leader>1 :Pydata1<space>
     autocmd FileType python nnoremap <leader>2 :Pydata2<space>
