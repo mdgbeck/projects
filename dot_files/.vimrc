@@ -273,4 +273,4 @@ nnoremap <F1> <c-w>w
 let g:repl_height = 20
 
 " move last y to xclipboard (copy paste)
-nnoremap <silent> <leader>c :let @+=@"<cr>
+nnoremap <silent> <leader>y :let @+=@"<cr>
