@@ -208,6 +208,7 @@ augroup allfiles
     " if tab behavior set outside group sets all filetypes to that on resource
     autocmd BufNewFile,BufRead *.conf set syntax=text
     autocmd BufNewFile,BufRead * if expand('%:t') !~ '\.' | set ft=sh | endif
+    " copy current bash line into registry
     autocmd BufNewFile,BufRead *.bash_history nnoremap o "+yy
     autocmd BufNewFile,BufRead *.bash_history nnoremap p ZQ
     autocmd BufNewFile,BufRead *.bash_history :silent g/^$/d
@@ -271,3 +272,5 @@ nnoremap <F1> <c-w>w
 
 let g:repl_height = 20
 
+" move last y to xclipboard (copy paste)
+nnoremap <silent> <leader>c :let @+=@"<cr>
