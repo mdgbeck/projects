@@ -10,8 +10,8 @@ mogrify -resize 25% *.jpg
 
 for f in *.jpg
 do
-    display $f
     echo 'New filename:'
+    display $f
     read newname
     mv $f $newloc/$newname.jpg
 done
