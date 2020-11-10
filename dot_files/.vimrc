@@ -26,7 +26,6 @@ let mapleader=" "
 let localleader="\\"
 
 nnoremap <leader>d :NERDTreeToggle<cr>
-nnoremap <leader>q <c-w>w
 " let g:sendtorepl_invoke_key = "<leader>e"
 
 " add true color support
@@ -169,7 +168,7 @@ augroup filetype_python
     autocmd FileType python setlocal shiftwidth=4
     autocmd FileType python setlocal softtabstop=4
     autocmd FileType python setlocal expandtab
-    autocmd FileType python setlocal textwidth=80
+    "autocmd FileType python setlocal textwidth=80
     " autocmd FileType python nnoremap <leader>rw <c-w>j.to_csv(r'~/data_view.csv')<home>
     autocmd FileType python nnoremap <leader>1 :Pydata1<space>
     autocmd FileType python nnoremap <leader>2 :Pydata2<space>
@@ -229,6 +228,8 @@ nnoremap <leader>r3 :! libreoffice ~/.data/d3.csv &<cr><cr>
 nnoremap <leader>r4 :! libreoffice ~/.data/d4.csv &<cr><cr>
 nnoremap <leader>= <c-w>5+
 nnoremap <leader>- <c-w>5-
+nnoremap <leader>_ <c-w>5<
+nnoremap <leader>+ <c-w>5>
 nnoremap <leader>t :REPLToggle<Cr>
 nnoremap <leader>T :term<cr>
 
@@ -244,7 +245,6 @@ nnoremap <leader>( :execute "normal \<Plug>Ysurround$("<cr>
 
 nnoremap <leader>h ^
 nnoremap <leader>H 0
-nnoremap <leader>l $
 
 
 " set in plugin files since re sourcing vimrc breaks call
@@ -263,7 +263,6 @@ nnoremap <leader>l $
 nnoremap <expr> j v:count ? (v:count > 2 ? "m'" . v:count : '') . 'j' : 'gj'
 nnoremap <expr> k v:count ? (v:count > 2 ? "m'" . v:count : '') . 'k' : 'gk'
 
-nnoremap <leader>p yy``P
 nnoremap <leader>c :cd %:h<cr>
 
 tnoremap <F1> <c-w>w
