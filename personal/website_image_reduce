@@ -1,0 +1,20 @@
+#!/bin/bash
+
+set -e
+
+imagedir=/media/michael/hdd/recipe_pictures/
+newloc=~/Documents/website2/content/recipes/images/
+
+cd $imagedir
+mogrify -resize 25% *.jpg
+
+for f in *.jpg
+do
+    echo 'New filename:'
+    display $f
+    read newname
+    mv $f $newloc/$newname.jpg
+done
+
+#PID=`jobs -p`
+
