@@ -78,8 +78,9 @@ set cursorline
 set incsearch " search as characters are typed
 
 " set indention settings
-set smartindent
-set autoindent
+" set smartindent
+" set autoindent
+filetype indent on
 
 " set split to open below and right
 set splitbelow
