@@ -131,6 +131,9 @@ alias p3='python3'
 # add alias for sudo docker
 alias sd='sudo docker'
 
+# alias for bash history
+alias bh='vim ~/.bash_history'
+
 # alias for recipe directory
 alias wr='cd ~/Documents/website2/content/recipes/'
 
