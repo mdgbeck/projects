@@ -10,7 +10,7 @@ cd $recdir
 rsync -a --exclude 'index.html' \
     baking/ \
     beef/ \
-    chicken/ \
+    poultry/ \
     pork/ \
     seafood/ \
     sides_sauces_misc/ \
@@ -22,8 +22,8 @@ tree baking/ -HD '.' -L 1 --noreport --charset utf-8 \
     -I "$index_ignore" --timefmt '%Y-%m-%d' > baking/index.html
 tree beef/ -HD '.' -L 1 --noreport --charset utf-8 \
     -I "$index_ignore" --timefmt '%Y-%m-%d' > beef/index.html
-tree chicken/ -HD '.' -L 1 --noreport --charset utf-8 \
-    -I "$index_ignore" --timefmt '%Y-%m-%d' > chicken/index.html
+tree poultry/ -HD '.' -L 1 --noreport --charset utf-8 \
+    -I "$index_ignore" --timefmt '%Y-%m-%d' > poultry/index.html
 tree pork/ -HD '.' -L 1 --noreport --charset utf-8 \
     -I "$index_ignore" --timefmt '%Y-%m-%d' > pork/index.html
 tree seafood/ -HD '.' -L 1 --noreport --charset utf-8 \

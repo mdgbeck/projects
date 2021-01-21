@@ -1,4 +1,3 @@
-#!/bin/bash
 
 set -e
 
@@ -6,14 +5,30 @@ imagedir=/media/michael/hdd/recipe_pictures/
 newloc=~/Documents/website2/content/recipes/images/
 
 cd $imagedir
+# mogrify -format jpg *.png
+echo 'resizing pictures'
 mogrify -resize 25% *.jpg
 
 for f in *.jpg
 do
-    echo 'New filename:'
     display $f
-    read newname
-    mv $f $newloc/$newname.jpg
+    echo -n 'Type 1 for preview picture, 2 for finished picture: '
+    read loc
+    case "$loc" in
+        1)
+            echo -n 'What is the filename for the preview picture? '
+            read newname
+            mv $f $newloc/preview/$newname.jpg
+            ;;
+        2)
+            echo -n 'What is the filename for the finished picture? '
+            read newname
+            mv $f $newloc/finished/$newname.jpg
+            ;;
+        *)
+            echo -n 'Not an option - skipping picture'
+            ;;
+    esac
 done
 
 #PID=`jobs -p`
