@@ -152,3 +152,9 @@ set -o vi
 alias c='clear'
 alias p='pwd'
 alias pi='pipenv shell'
+
+# change owner to user on all files in folder and change permissions
+alias cha='sudo chown -R $USER:$USER ./; chmod -R 664 ./*'
+
+# alias to exec into doccker for cse
+alias exbb='sudo docker exec -it bigbox /bin/bash'
