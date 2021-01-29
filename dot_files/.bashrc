@@ -158,3 +158,5 @@ alias cha='sudo chown -R $USER:$USER ./;'
 
 # alias to exec into doccker for cse
 alias exbb='sudo docker start bigbox; sudo docker exec -it bigbox /bin/bash'
+
+alias gt='cd Documents/gatech/cse6250/'
