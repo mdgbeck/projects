@@ -30,4 +30,4 @@ vim ~/.ssh/config
 sudo apt install python3-pip
 pip3 install pipenv
 sudo pip3 install ipython
-sudo apt install libssl-dev libcurl4-openssl-dev
+sudo apt install libssl-dev libcurl4-openssl-dev libxml2-dev
