@@ -275,3 +275,4 @@ let g:repl_position = 3
 
 " move last y to xclipboard (copy paste)
 nnoremap <silent> <leader>y :let @+=@"<cr>
+
