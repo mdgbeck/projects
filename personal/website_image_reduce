@@ -7,12 +7,12 @@ newloc=~/Documents/website2/content/recipes/images/
 cd $imagedir
 # mogrify -format jpg *.png
 echo 'resizing pictures'
-mogrify -resize 25% *.jpg
+mogrify -resize '240000@' *.jpg
 
 for f in *.jpg
 do
     display $f
-    echo -n 'Type 1 for preview picture, 2 for finished picture: '
+    echo -n 'Type 1 for preview picture, 2 for finished picture, 3 for product '
     read loc
     case "$loc" in
         1)
@@ -24,6 +24,11 @@ do
             echo -n 'What is the filename for the finished picture? '
             read newname
             mv $f $newloc/finished/$newname.jpg
+            ;;
+        3)
+            echo -n 'what is the filename for the product? '
+            read newname
+            mv $f $newloc/products/$newname.jpg
             ;;
         *)
             echo -n 'Not an option - skipping picture'
