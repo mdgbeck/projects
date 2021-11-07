@@ -271,6 +271,8 @@ inoremap <F1> <esc><c-w>w
 nnoremap <F1> <c-w>w
 
 let g:repl_height = 20
+let g:repl_position = 3
 
 " move last y to xclipboard (copy paste)
 nnoremap <silent> <leader>y :let @+=@"<cr>
+

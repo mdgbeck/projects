@@ -157,6 +157,26 @@ alias pi='pipenv shell'
 alias cha='sudo chown -R $USER:$USER ./;'
 
 # alias to exec into doccker for cse
-alias exbb='sudo docker start bigbox; sudo docker exec -it bigbox /bin/bash'
+alias exbb='sudo docker start bigbox_old; sudo docker exec -it bigbox_old /bin/bash'
+
+alias csedock='sudo docker start csebigbox; sudo docker exec -it csebigbox /bin/bash'
 
 alias gt='cd ~/Documents/gatech/cse6250/'
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/home/michael/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/home/michael/miniconda3/etc/profile.d/conda.sh" ]; then
+        . "/home/michael/miniconda3/etc/profile.d/conda.sh"
+    else
+        export PATH="/home/michael/miniconda3/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+
+alias cond="conda deactivate"
+alias cona="conda activate"
