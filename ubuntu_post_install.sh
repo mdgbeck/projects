@@ -31,3 +31,8 @@ sudo apt install python3-pip
 pip3 install pipenv
 sudo pip3 install ipython
 sudo apt install libssl-dev libcurl4-openssl-dev libxml2-dev
+
+# wifi driver for usb
+git clone https://github.com/aircrack-ng/rtl8812au.git
+cd rtl8812au/
+sudo make install
