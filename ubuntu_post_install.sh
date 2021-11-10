@@ -27,7 +27,7 @@ sudo add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu focal-
 #sudo add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
 sudo apt update
 sudo apt install r-base
-#r
+#R
 ln -s ~/Documents/projects/dot_files/.Rprofile ~/.Rprofile
 ls
 vim ~/.ssh/config
