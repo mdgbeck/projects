@@ -13,17 +13,21 @@ rm ~/.bashrc
 rm ~/.vimrc
 ln -s ~/Documents/projects/dot_files/.vimrc ~/.vimrc
 ln -s ~/Documents/projects/dot_files/.bashrc ~/.bashrc
-ln -s ~/Documents/projects/dot_files/.Rprofile ~/.Rprofile
+# restart / resource bashrc to take effect
+
 curl -fLo ~/.vim/autoload/plug.vim --create-dirs     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 vim
+# :PlugInstall
 git clone https://github.com/chriskempson/base16-shell.git ~/.config/base16-shell
+
+# restart terminal
 base16_gruvbox-dark-pale 
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
 sudo add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/'
+#sudo add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
 sudo apt update
 sudo apt install r-base
-sudo apt update
-sudo apt install r-base
+#R
 ln -s ~/Documents/projects/dot_files/.Rprofile ~/.Rprofile
 ls
 vim ~/.ssh/config
