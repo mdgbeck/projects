@@ -180,3 +180,4 @@ unset __conda_setup
 
 alias cond="conda deactivate"
 alias cona="conda activate"
+alias R="R --no-save"
