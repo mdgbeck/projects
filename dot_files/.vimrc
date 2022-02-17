@@ -250,7 +250,7 @@ nnoremap <leader>H 0
 
 " set in plugin files since re sourcing vimrc breaks call
 let g:repl_program = {
-    \   'python': 'python',
+    \   'python': 'ipython3',
     \   'r': 'R --no-save',
     \ }
 
