@@ -1,0 +1,38 @@
+library(tidyverse)
+library(lubridate)
+
+dat <- read_csv('clt_traffic/archive/all_data.csv', col_names = c(
+  'event_no', 'event_time', 'added_time', 'type_code', 'type_desc', 'type_subcode',
+  'type_subdesc', 'division', 'x_coord', 'y_coord', 'latitude', 'longitude', 'address', 'time_pulled'
+))
+dat <- dat %>% mutate(added_time = as_datetime(added_time))
+
+first_pull = min(dat$time_pulled)
+most_recent = max(dat$time_pulled)
+
+events <- dat %>% 
+  group_by(event_no) %>% 
+  summarize(
+    min_event_time = min(event_time),
+    min_time_pulled = min(time_pulled),
+    max_time_pulled = max(time_pulled),
+  ) %>% 
+  mutate(
+    time_listed = round(difftime(max_time_pulled, min_time_pulled, units = 'mins')),
+    time_listed = ifelse(
+      max_time_pulled == most_recent | min_time_pulled == first_pull, 
+      NA, time_listed
+    )
+  )
+
+check <- dat %>% 
+  group_by(event_no, event_time, type_desc, type_subcode, division, address, latitude, longitude) %>% 
+  summarize(
+    n_times = n(),
+    min_time_pulled = min(time_pulled),
+    max_time_pulled = max(time_pulled)
+  )
+
+
+dat = fromJSON(content(GET('https://cmpdinfo.charlottenc.gov/api/v2.1/Traffic'), "text"))
+               

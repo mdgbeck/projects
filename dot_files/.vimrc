@@ -249,14 +249,15 @@ nnoremap <leader>H 0
 
 
 " set in plugin files since re sourcing vimrc breaks call
-" let g:repl_program = {
-"     \   'python': 'ipython3',
-"     \   'r': 'R --no-save',
-"     \ }
+let g:repl_program = {
+    \   'python': 'python',
+    \   'r': 'R --no-save',
+    \ }
 
 " let g:repl_exit_commands = {
 "     \   'radian': 'q()'
-    \ }
+"   \ }
+
 " let NERDTreeMapActivateNode = 'e'
 " let NERDTreeMapOpenExpl = 'E'
 

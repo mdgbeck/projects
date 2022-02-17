@@ -161,7 +161,8 @@ alias exbb='sudo docker start bigbox_old; sudo docker exec -it bigbox_old /bin/b
 
 alias csedock='sudo docker start csebigbox; sudo docker exec -it csebigbox /bin/bash'
 
-alias gt='cd ~/Documents/gatech/cse6250/'
+alias gt='cd ~/Documents/gatech/dva_cse6242/'
+alias clt='vim ~/Documents/projects/clt_traffic/log'
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
