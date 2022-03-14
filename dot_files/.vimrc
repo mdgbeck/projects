@@ -72,6 +72,12 @@ hi CursorLineNr cterm=bold
 set showcmd
 
 " highlight current line
+augroup BgHighlight
+    autocmd!
+    autocmd WinEnter * set cul
+    autocmd WinLeave * set nocul
+augroup END
+
 set cursorline
 
 " change search settings
@@ -106,8 +112,9 @@ augroup end
 " set emmet leaderkey
 let g:user_emmet_leader_key=','
 
-" set f5 to insert date
-inoremap <F5> <C-R>=strftime('%Y-%m-%d')<CR>
+" set f2 to insert date
+inoremap <F2> <C-R>=strftime('%Y-%m-%d')<CR>
+
 
 " set - to move line down one line and _ to move up
 nnoremap - ddp 
@@ -212,10 +219,10 @@ augroup allfiles
     autocmd BufNewFile,BufRead *.bash_history nnoremap o "+yy
     autocmd BufNewFile,BufRead *.bash_history nnoremap p ZQ
     autocmd BufNewFile,BufRead *.bash_history :silent g/^$/d
-    autocmd FileType text,sh,conf,vim setlocal tabstop=4
-    autocmd FileType text,sh,conf,vim setlocal shiftwidth=4
-    autocmd FileType text,sh,conf,vim setlocal softtabstop=4
-    autocmd FileType text,sh,conf,vim setlocal expandtab
+    autocmd FileType text,sh,conf,vim,javascript setlocal tabstop=4
+    autocmd FileType text,sh,conf,vim,javascript setlocal shiftwidth=4
+    autocmd FileType text,sh,conf,vim,javascript setlocal softtabstop=4
+    autocmd FileType text,sh,conf,vim,javascript setlocal expandtab
 augroup END
 
 " commands to send code to console
@@ -266,6 +273,22 @@ nnoremap <expr> j v:count ? (v:count > 2 ? "m'" . v:count : '') . 'j' : 'gj'
 nnoremap <expr> k v:count ? (v:count > 2 ? "m'" . v:count : '') . 'k' : 'gk'
 
 nnoremap <leader>c :cd %:h<cr>
+
+tnoremap <F5> <c-w>h
+inoremap <F5> <esc><c-w>h
+nnoremap <F5> <c-w>h
+
+tnoremap <F6> <c-w>j
+inoremap <F6> <esc><c-w>j
+nnoremap <F6> <c-w>j
+
+tnoremap <F7> <c-w>k
+inoremap <F7> <esc><c-w>k
+nnoremap <F7> <c-w>k
+
+tnoremap <F8> <c-w>l
+inoremap <F8> <esc><c-w>l
+nnoremap <F8> <c-w>l
 
 tnoremap <F1> <c-w>w
 inoremap <F1> <esc><c-w>w
