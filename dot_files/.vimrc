@@ -1,4 +1,5 @@
 
+
 " add vim-plug
 " Plugins will be downloaded under the specified directory.
 call plug#begin('~/.vim/plugged')
@@ -16,9 +17,15 @@ Plug 'tmsvg/pear-tree'
 Plug 'wincent/terminus', {'frozen': 1}
 Plug 'sillybun/vim-repl', { 'frozen': 1}
 Plug 'mattn/emmet-vim', { 'for': ['html', 'xml'] }
+Plug 'psliwka/vim-smoothie'
 
 " " List ends here. Plugins become visible to Vim after this call.
 call plug#end()
+
+" add true color support
+if (has("termguicolors"))
+    set termguicolors
+endif
 
 " set global leader key
 nnoremap <SPACE> <Nop>
@@ -28,18 +35,14 @@ let localleader="\\"
 nnoremap <leader>d :NERDTreeToggle<cr>
 " let g:sendtorepl_invoke_key = "<leader>e"
 
-" add true color support
-if (has("termguicolors"))
-    set termguicolors
+" switched for easy toggle
+if &background ==# 'light'
+    " colo base16-atelier-dune-light
+    colo base16-gruvbox-light-medium
+else
+    colo base16-eighties
 endif
 
-" switched for easy toggle
-if &background ==# 'dark'
-    " colo base16-atelier-dune-light
-    colo base16-solarized-light
-else
-    colo base16-gruvbox-dark-pale
-endif
 
 nnoremap <leader>b :set background=light<cr>:source $MYVIMRC<cr>
 nnoremap <leader>n :set background=dark<cr>:source $MYVIMRC<cr>
@@ -83,6 +86,8 @@ set cursorline
 " change search settings
 set incsearch " search as characters are typed
 
+nnoremap <leader>s :set hlsearch! hlsearch?<CR>
+
 " set indention settings
 " set smartindent
 " set autoindent
@@ -124,7 +129,7 @@ nnoremap _ ddkP
 inoremap <c-d> <esc>ddi
 inoremap <c-f> <esc><c-w>za
 
-nnoremap <leader>vv :split $MYVIMRC<cr>
+nnoremap <leader>vv :tabnew $MYVIMRC<cr>
 nnoremap <leader>vs :source $MYVIMRC<cr>
 
 iabbrev adn and
@@ -294,9 +299,28 @@ tnoremap <F1> <c-w>w
 inoremap <F1> <esc><c-w>w
 nnoremap <F1> <c-w>w
 
+" set tab switching to F2 - F4
+tnoremap <F2> gt
+inoremap <F2> <esc>gt
+nnoremap <F2> gt
+
+tnoremap <F4> :tabnext<cr>
+inoremap <F4> <esc>:tabnext<cr>
+nnoremap <F4> :tabnext<cr>
+
+tnoremap <F3> :tabprevious<cr>
+inoremap <F3> <esc>:tabprevious<cr>
+nnoremap <F3> :tabprevious<cr>
+
 let g:repl_height = 20
 let g:repl_position = 3
 
 " move last y to xclipboard (copy paste)
 nnoremap <silent> <leader>y :let @+=@"<cr>
+
+" create mapping to print current directory
+nnoremap <leader>p :pwd<cr>
+
+let g:smoothie_speed_constant_factor = 25
+let g:smoothie_speed_exponentiation_factor = 1.0
 
