@@ -1,0 +1,502 @@
+Identification_Information:
+  Citation:
+    Citation_Information:
+      Originator: Indiana Department of Transportation
+      Publication_Date: 20160701
+      Title: TRAFFIC_COUNTS_INDOTMODEL_IN.SHP: Traffic Counts on Roadways in Indiana, 2014 (Indiana Department of Transportation, Line Shapefile)
+      Geospatial_Data_Presentation_Form: Map
+      Publication_Information:
+        Publication_Place: Indianapolis, Indiana
+        Publisher: Indiana Department of Transportation, Road Inventory Section
+      Other_Citation_Details:
+        Bernardin-Lochmueller and Associates used the Indiana Statewide Travel Demand Model, version 4 (ISTDM4) files in TransCAD to convert
+        a subset to an ESRI ArcView shapefile. Tables were edited to contain only the fields appropriate for the traffic counts subset.
+
+        NOTE -- Updated data were provided by INDOT personnel on July 1, 2016.
+
+      Online_Linkage: http://maps.indiana.edu/layers.html
+  Description:
+    Abstract:
+      TRAFFIC_COUNTS_INDOTMODEL_IN.SHP is a line shapefile that shows Annual Average Daily Traffic Counts on Indiana roads. The data were derived from pre-existing
+      INDOT basemaps and databases. The data were compiled by Indiana GIS Department of Transportation (INDOT), Road Inventory Section. The Data in the attribute table
+      are dated for the year 2014.
+    Purpose: To provide an updated GIS layer showing Annual Average Daily Traffic Counts on Indiana roads in a GIS format.
+  Time_Period_of_Content:
+    Time_Period_Information:
+      Single_Date/Time:
+        Calendar_Date: 20160701
+    Currentness_Reference: Publication Date
+  Status:
+    Progress: Complete
+    Maintenance_and_Update_Frequency: As needed
+  Spatial_Domain:
+    Bounding_Coordinates:
+      West_Bounding_Coordinate: -88.088602
+      East_Bounding_Coordinate: -84.695560
+      North_Bounding_Coordinate: 41.779318
+      South_Bounding_Coordinate: 37.762697
+  Keywords:
+    Theme:
+      Theme_Keyword_Thesaurus: Geography Network Keyword Thesaurus
+      Theme_Keyword: transportation
+    Theme:
+      Theme_Keyword_Thesaurus: None
+      Theme_Keyword: transportation
+      Theme_Keyword: highways
+      Theme_Keyword: interstate
+      Theme_Keyword: state highways
+      Theme_Keyword: traffic
+      Theme_Keyword: urban planning
+      Theme_Keyword: roads
+      Theme_Keyword: US Highways
+      Theme_Keyword: travel model
+      Theme_Keyword: traffic Counts
+      Theme_Keyword: traffic volume
+      Theme_Keyword: Annual Average Daily Traffic (AADT)
+    Place:
+      Place_Keyword_Thesaurus: None
+      Place_Keyword: Adams
+      Place_Keyword: Allen
+      Place_Keyword: Bartholomew
+      Place_Keyword: Benton
+      Place_Keyword: Blackford
+      Place_Keyword: Boone
+      Place_Keyword: Brown
+      Place_Keyword: Carroll
+      Place_Keyword: Cass
+      Place_Keyword: Clark
+      Place_Keyword: Clay
+      Place_Keyword: Clinton
+      Place_Keyword: Crawford
+      Place_Keyword: Daviess
+      Place_Keyword: Dearborn
+      Place_Keyword: Decatur
+      Place_Keyword: DeKalb
+      Place_Keyword: Delaware
+      Place_Keyword: Dubois
+      Place_Keyword: Elkhart
+      Place_Keyword: Fayette
+      Place_Keyword: Floyd
+      Place_Keyword: Fountain
+      Place_Keyword: Franklin
+      Place_Keyword: Fulton
+      Place_Keyword: Gibson
+      Place_Keyword: Grant
+      Place_Keyword: Greene
+      Place_Keyword: Hamilton
+      Place_Keyword: Hancock
+      Place_Keyword: Harrison
+      Place_Keyword: Hendricks
+      Place_Keyword: Henry
+      Place_Keyword: Howard
+      Place_Keyword: Huntington
+      Place_Keyword: Indiana
+      Place_Keyword: Jackson
+      Place_Keyword: Jasper
+      Place_Keyword: Jay
+      Place_Keyword: Jefferson
+      Place_Keyword: Jennings
+      Place_Keyword: Johnson
+      Place_Keyword: Knox
+      Place_Keyword: Kosciusko
+      Place_Keyword: Lagrange
+      Place_Keyword: Lake
+      Place_Keyword: Laporte
+      Place_Keyword: Lawrence
+      Place_Keyword: Madison
+      Place_Keyword: Marion
+      Place_Keyword: Marshall
+      Place_Keyword: Martin
+      Place_Keyword: Miami
+      Place_Keyword: Monroe
+      Place_Keyword: Montgomery
+      Place_Keyword: Morgan
+      Place_Keyword: Newton
+      Place_Keyword: Noble
+      Place_Keyword: Ohio
+      Place_Keyword: Orange
+      Place_Keyword: Owen
+      Place_Keyword: Parke
+      Place_Keyword: Perry
+      Place_Keyword: Pike
+      Place_Keyword: Porter
+      Place_Keyword: Posey
+      Place_Keyword: Pulaski
+      Place_Keyword: Putnam
+      Place_Keyword: Randolph
+      Place_Keyword: Ripley
+      Place_Keyword: Rush
+      Place_Keyword: St Joseph
+      Place_Keyword: Scott
+      Place_Keyword: Shelby
+      Place_Keyword: Spencer
+      Place_Keyword: Starke
+      Place_Keyword: Steuben
+      Place_Keyword: Sullivan
+      Place_Keyword: Switzerland
+      Place_Keyword: Tippecanoe
+      Place_Keyword: Tipton
+      Place_Keyword: Union
+      Place_Keyword: Vanderburgh
+      Place_Keyword: Vermillion
+      Place_Keyword: Vigo
+      Place_Keyword: Wabash
+      Place_Keyword: Warren
+      Place_Keyword: Warrick
+      Place_Keyword: Washington
+      Place_Keyword: Wayne
+      Place_Keyword: Wells
+      Place_Keyword: White
+      Place_Keyword: Whitley
+
+  Access_Constraints:
+    This file is available to anyone, but access may be contingent on written request, specific terms relevant to the agency or person making the request, and/or current
+    freedom of information statutes in the state of Indiana.
+  Use_Constraints:
+    INDIANA GEOLOGICAL SURVEY DATA DISCLAIMER
+
+    This data set is provided by Indiana University, Indiana Geological Survey, and contains data believed to be accurate; however, a degree of error
+    is inherent in all data. This product is distributed "AS-IS" without warranties of any kind, either expressed or implied, including but not
+    limited to warranties of suitability of a particular purpose or use. No attempt has been made in either the designed format or production of these data to
+    define the limits or jurisdiction of any federal, state, or local government.
+
+    These data are intended for use only at the published scale or smaller and are for reference purposes only. They are not to be construed as a legal document or survey
+    instrument. A detailed on-the-ground survey and historical analysis of a single site may differ from these data.
+
+    CREDIT
+
+    It is requested that the Indiana Department of Transportation be cited in any products generated from this data. The following source citation
+    should be included: [TRAFFIC_COUNTS_INDOTMODEL_IN.SHP: Traffic Counts on Roadways in Indiana, 2014 (Indiana Department of Transportation, Line Shapefile), 20160701].
+
+    WARRANTY
+
+    Indiana University, Indiana Geological Survey warrants that the media on which this product is stored will be free from defect in materials and
+    workmanship for ninety (90) days from the date of acquisition. If such a defect is found, return the media to Publication Sales, Indiana
+    Geological Survey, 611 North Walnut Grove, Bloomington, Indiana 47405, and it will be replaced free of charge.
+
+    LIMITATION OF WARRANTIES AND LIABILITY
+
+    Except for the expressed warranty above, the product is provided "AS IS", without any other warranties or conditions, expressed or implied,
+    including, but not limited to, warranties for product quality, or suitability to a particular purpose or use. The risk or liability
+    resulting from the use of this product is assumed by the user. Indiana University, Indiana Geological Survey shares no liability with product
+    users indirect, incidental, special, or consequential damages whatsoever, including, but not limited to, loss of revenue or profit, lost or
+    damaged data or other commercial or economic loss. Indiana University, Indiana Geological Survey is not responsible for claims by a third party. The
+    maximum aggregate liability to the original purchaser shall not exceed the amount paid by you for the product.
+  Point_of_Contact:
+    Contact_Information:
+      Contact_Organization_Primary:
+        Contact_Organization: Indiana Department of Transportation, Road Inventory Supervisor (Eric Rader)
+      Contact_Address:
+        Address_Type: Mailing and physical address
+        Address: 100 North Senate Avenue
+        City: Indianapolis
+        State_or_Province: Indiana
+        Postal_Code: 46204
+        Country: USA
+      Contact_Voice_Telephone: 317-232-5428
+      Contact_Facsimile_Telephone: 317-232-5169
+      Contact_Electronic_Mail_Address: Wrader@indot.IN.gov
+      Hours_of_Service: 0730 to 1700 Eastern Standard Time
+      Contact_Instructions: Tuesday through Friday, except holidays
+
+  Data_Set_Credit: Data were supplied by INDOT personnel (Michelle Burgess, Roadway Inventory Analyst, INDOT).
+  Native_Data_Set_Environment: Esri ArcGIS version 10.3 file geodatabase line feature class format, approximately 6.6 Mb
+
+Data_Quality_Information:
+  Attribute_Accuracy:
+    Attribute_Accuracy_Report: This data set was provided by INDOT personnel and is assumed to be accurate.
+  Logical_Consistency_Report: This data set was provided by INDOT personnel and is assumed to be accurate.
+  Completeness_Report: This data set was provided by INDOT personnel and is assumed to be complete.
+  Positional_Accuracy:
+    Horizontal_Positional_Accuracy:
+      Horizontal_Positional_Accuracy_Report: None reported. This data set was provided by INDOT personnel and is assumed to be accurate.
+
+    Vertical_Positional_Accuracy:
+      Vertical_Positional_Accuracy_Report: None reported. This data set was provided by INDOT personnel and is assumed to be accurate.
+
+  Lineage:
+    Source_Information:
+      Source_Citation:
+        Citation_Information:
+          Originator: Michelle Burgess (Roadway Inventory Analyst, INDOT)
+          Publication_Date: 20160701
+          Title: TRAFFIC_COUNTS (Esri point feature class)
+          Geospatial_Data_Presentation_Form: Vector digital data
+          Publication_Information:
+            Publication_Place: Indianapolis, Indiana
+            Publisher: INDOT
+          Other_Citation_Details: None
+      Type_of_Source_Media: .ZIP file attachment to an electronic-mail (E-Mail)
+      Source_Time_Period_of_Content:
+        Time_Period_Information:
+          Single_Date/Time:
+            Calendar_Date: 20160701
+        Source_Currentness_Reference: Publication date
+      Source_Citation_Abbreviation: TRAFFIC_COUNTS (Esri point feature class)
+      Source_Contribution: Annual Average Daily Traffic counts for roads in Indiana, 2014
+
+    Process_Step:
+      Process_Description:
+        The base_2000 file from the Indiana Statewide Travel Demand Model, version 4, (ISTDM4) was converted in TransCAD to an ESRI ArcView Shapefile.
+        Roadways were selected to those in Indiana by querying a boolean field for Indiana. All roadways in the model were included in the subset,
+        however centroid connectors were removed. Numerous attribute fields were removed to result in the basic roadway information.
+      Source_Used_Citation_Abbreviation: INDOTMODEL
+      Process_Date: 20040700
+      Source_Produced_Citation_Abbreviation: TRAFFIC_INDOT
+      Process_Contact:
+        Contact_Information:
+          Contact_Person_Primary:
+            Contact_Organization: Bernardin-Lochmueller & Assoicates
+            Contact_Person: Daniel Townsend
+          Contact_Position: Transportation Engineer I
+          Contact_Address:
+            Address_Type: Mailing and physical address
+            Address: 6200 Vogel Road
+            City: Evansville
+            State_or_Province: Indiana
+            Postal_Code: 47715-4006
+            Country: USA
+          Contact_Voice_Telephone: 800-423-7411
+          Contact_Facsimile_Telephone: 812-479-6262
+          Contact_Electronic_Mail_Address: daniel@BLAINC.com
+          Hours_of_Service: 8am-5pm CST
+
+    Process_Step:
+      Process_Description:
+        IGS personnel received an Esri line feature class named "TRAFFIC_COUNTS" from INDOT personnel on July 1, 2016. TRAFFIC_COUNTS was loaded into Esri ArcMap and examined
+        for completeness, attribute accuracy, and spatial accuracy. IGS personnel then exported the data to an Esri shapefile format named "TRAFFIC_COUNTS_INDOTMODEL_IN.SHP".
+      Source_Used_Citation_Abbreviation: TRAFFIC_COUNTS (Esri line feature class)
+      Process_Date: 20160701
+      Source_Produced_Citation_Abbreviation: TRAFFIC_COUNTS_INDOTMODEL_IN.SHP
+      Process_Contact:
+        Contact_Information:
+          Contact_Person_Primary:
+            Contact_Organization: Indiana Geological Survey
+            Contact_Person: Chris Dintaman
+          Contact_Position: Geologist, GIS Specialist
+          Contact_Address:
+            Address_Type: Mailing and physical address
+            Address: 611 North Walnut Grove
+            City: Bloomington
+            State_or_Province: Indiana
+            Postal_Code: 47405-2208
+            Country: USA
+          Contact_Voice_Telephone: 812-856-5654
+          Contact_Facsimile_Telephone: 812-855-2862
+          Contact_Electronic_Mail_Address: cdintama@indiana.edu
+          Hours_of_Service: 0800 to 1700 Eastern Standard Time
+          Contact_Instructions: Monday through Friday, except holidays
+
+    Process_Step:
+      Process_Description:
+        This metadata file was pre-parsed and parsed using CNS (Chew and Spit, v. 2.6.1) and MP (Metadata Parser, v. 2.7.1) software written by Peter N. Schweitzer
+        (U.S. Geological Survey). The errors generated by MP were all addressed and corrected, except that no values were assigned to "Abscissa_Resolution"
+        and "Ordinate_Resolution."
+      Process_Date: 20161028
+      Process_Contact:
+        Contact_Information:
+          Contact_Person_Primary:
+            Contact_Organization: Indiana Geological Survey
+            Contact_Person: Chris Dintaman
+          Contact_Position: Geologist, GIS Specialist
+          Contact_Address:
+            Address_Type: Mailing and physical address
+            Address: 611 North Walnut Grove
+            City: Bloomington
+            State_or_Province: Indiana
+            Postal_Code: 47405-2208
+            Country: USA
+          Contact_Voice_Telephone: 812-856-5654
+          Contact_Facsimile_Telephone: 812-855-2862
+          Contact_Electronic_Mail_Address: cdintama@indiana.edu
+          Hours_of_Service: 0800 to 1700 Eastern Standard Time
+          Contact_Instructions: Monday through Friday, except holidays
+
+Spatial_Data_Organization_Information:
+  Direct_Spatial_Reference_Method: Vector
+  Point_and_Vector_Object_Information:
+    SDTS_Terms_Description:
+      SDTS_Point_and_Vector_Object_Type: Complete Chain
+      Point_and_Vector_Object_Count: 20124
+
+Spatial_Reference_Information:
+  Horizontal_Coordinate_System_Definition:
+    Planar:
+      Grid_Coordinate_System:
+        Grid_Coordinate_System_Name: Universal Transverse Mercator
+        Universal_Transverse_Mercator:
+          UTM_Zone_Number: 16
+          Transverse_Mercator:
+            Scale_Factor_at_Central_Meridian: 0.999600
+            Longitude_of_Central_Meridian: -87.000000
+            Latitude_of_Projection_Origin: 0.000000
+            False_Easting: 500000.000000
+            False_Northing: 0.000000
+      Planar_Coordinate_Information:
+        Planar_Coordinate_Encoding_Method: Coordinate pair
+        Coordinate_Representation:
+          Abscissa_Resolution: 0.001024
+          Ordinate_Resolution: 0.001024
+        Planar_Distance_Units: Meters
+    Geodetic_Model:
+      Horizontal_Datum_Name: North American Datum of 1983
+      Ellipsoid_Name: GRS 80
+      Semi-major_Axis: 6378137.0000000
+      Denominator_of_Flattening_Ratio: 298.26
+
+Entity_and_Attribute_Information:
+  Detailed_Description:
+    Entity_Type:
+      Entity_Type_Label: TRAFFIC_COUNTS_INDOTMODEL_IN.dbf
+      Entity_Type_Definition: Shapefile Attribute Table
+      Entity_Type_Definition_Source: None
+    Attribute:
+      Attribute_Label: ROUTE_ID
+      Attribute_Definition: Road segment Identification Number
+      Attribute_Definition_Source: Indiana Department of Transportation
+      Attribute_Domain_Values:
+        Unrepresentable_Domain: Numeric Field
+    Attribute:
+      Attribute_Label: HPMS_YEAR
+      Attribute_Definition: Year in which the traffic counts were collected
+      Attribute_Definition_Source: Indiana Department of Transportation
+      Attribute_Domain_Values:
+        Unrepresentable_Domain: Numeric Field
+    Attribute:
+      Attribute_Label: AADT
+      Attribute_Definition: Annual Average Daily Traffic counts for the road segment, for the year 2014
+      Attribute_Definition_Source: Indiana Department of Transportation
+      Attribute_Domain_Values:
+        Unrepresentable_Domain: Numeric Field
+    Attribute:
+      Attribute_Label: DATE_LATES
+      Attribute_Definition: Last calendar date when count was recorded for the road segment
+      Attribute_Definition_Source: Indiana Department of Transportation
+      Attribute_Domain_Values:
+        Unrepresentable_Domain: Numeric Field
+    Attribute:
+      Attribute_Label: COMMENT_
+      Attribute_Definition: Cooments recorded by INDOT personnel, concerning the AADT counts for the road segment
+      Attribute_Definition_Source: Indiana Department of Transportation
+      Attribute_Domain_Values:
+        Unrepresentable_Domain: Character Field
+    Attribute:
+      Attribute_Label: SHAPE_LENG
+      Attribute_Definition: Length of the road segment
+      Attribute_Definition_Source: Indiana Department of Transportation
+      Attribute_Domain_Values:
+        Range_Domain:
+          Range_Domain_Minimum: 0.019104
+          Range_Domain_Maximum: 44157.269387
+          Attribute_Units_of_Measure: Meters
+
+Distribution_Information:
+  Distributor:
+    Contact_Information:
+      Contact_Organization_Primary:
+        Contact_Organization: Indiana Geological Survey
+        Contact_Person: Publication Sales
+      Contact_Position: Clerk
+      Contact_Address:
+        Address_Type: Mailing and physical address
+        Address: 611 North Walnut Grove
+        City: Bloomington
+        State_or_Province: Indiana
+        Postal_Code: 47405-2208
+        Country: USA
+      Contact_Voice_Telephone: 812-855-7636
+      Contact_Facsimile_Telephone: 812-855-2862
+      Contact_Electronic_Mail_Address: IGSInfo@indiana.edu
+      Hours_of_Service: 0800 to 1700 Eastern Standard Time
+      Contact_Instructions: Monday through Friday, except holidays
+
+  Resource_Description: Downloadable data
+
+  Distribution_Liability:
+    CREDIT
+
+    It is requested that the Indiana Department of Transportation be cited in any products generated from this data. The following source citation
+    should be included: [TRAFFIC_COUNTS_INDOTMODEL_IN.SHP: Traffic Counts on Roadways in Indiana, 2014 (Indiana Department of Transportation, Line Shapefile), 20160701].
+
+    WARRANTY
+
+    Indiana University, Indiana Geological Survey warrants that the media on which this product is stored will be free from defect in materials and
+    workmanship for ninety (90) days from the date of acquisition. If such a defect is found, return the media to Publication Sales, Indiana
+    Geological Survey, 611 North Walnut Grove, Bloomington, Indiana 47405-2208, and it will be replaced free of charge.
+
+    LIMITATION OF WARRANTIES AND LIABILITY
+
+    Except for the expressed warranty above, the product is provided "AS IS", without any other warranties or conditions, expressed or implied,
+    including, but not limited to, warranties for product quality, or suitability to a particular purpose or use. The risk or liability
+    resulting from the use of this product is assumed by the user. Indiana University, Indiana Geological Survey shares no liability with product
+    users indirect, incidental, special, or consequential damages whatsoever, including, but not limited to, loss of revenue or profit, lost or
+    damaged data or other commercial or economic loss. Indiana University, Indiana Geological Survey is not responsible for claims by a third party. The
+    maximum aggregate liability to the original purchaser shall not exceed the amount paid by you for the product.
+
+Distribution_Information:
+  Distributor:
+    Contact_Information:
+      Contact_Organization_Primary:
+        Contact_Organization: Indiana Department of Transportation
+      Contact_Position: Indiana Department of Transportation, Road Inventory Supervisor (Eric Rader)
+      Contact_Address:
+        Address_Type: Mailing and physical address
+        Address: 100 North Senate Avenue
+        City: Indianapolis
+        State_or_Province: Indiana
+        Postal_Code: 46204
+        Country: USA
+      Contact_Voice_Telephone: 317-232-5428
+      Contact_Facsimile_Telephone: 317-232-5169
+      Contact_Electronic_Mail_Address: Wrader@indot.IN.gov
+      Hours_of_Service: 0730 to 1700 Eastern Standard Time
+      Contact_Instructions: Tuesday through Friday, except holidays
+
+  Resource_Description: Downloadable data
+
+  Distribution_Liability:
+    The following is excerpted from the metadata provided by INDOT:
+
+    "    INDOT Disclaimer
+    AS OF 01\01\2001
+
+    The Indiana Department of Transportation (INDOT) Provides these geographic data "as is" and the user accepts the data "as is", and assumes
+    all risks associated with its use.  By acceptance of this data, the user agrees not to transmit this data or provide access to it, or any
+    part of it, to another party unless the user shall include with the data a copy of this disclaimer.  INDOT makes no guarantee or warranty
+    concerning the accuracy of information contained in the geographic data.  INDOT further makes no warranties, either expressed or implied as
+    to any other matter whatsoever, including, without limitation, the condition of any product, or its fitness for any particular purpose. The
+    burden for determining fitness for use lies entirely with the user. Although these data have been processed successfully on computers of
+    INDOT, no warranty, expressed or implied, is made by INDOT regarding the use of these data on any other system, nor does the fact of distribution
+    constitute or imply any such warranty.
+
+    In no event shall INDOT have any liability whatsoever for payment of any consequential, incidental, indirect, special, or tort damages of
+    any kind, including, but not limited to, any loss of profits arising out of or reliance on the geographic data or arising out of the delivery,
+    installation, operation, or support by INDOT."
+
+Metadata_Reference_Information:
+  Metadata_Date: 20040729
+  Metadata_Review_Date: 20161028
+  Metadata_Contact:
+    Contact_Information:
+      Contact_Organization_Primary:
+        Contact_Organization: Indiana Geological Survey
+        Contact_Person: Chris Dintaman
+      Contact_Position: Geologist, GIS Specialist
+      Contact_Address:
+        Address_Type: Mailing and physical address
+        Address: 611 North Walnut Grove
+        City: Bloomington
+        State_or_Province: Indiana
+        Postal_Code: 47405-2208
+        Country: USA
+      Contact_Voice_Telephone: 812-856-5654
+      Contact_Facsimile_Telephone: 812-855-2862
+      Contact_Electronic_Mail_Address: cdintama@indiana.edu
+      Hours_of_Service: 0800 to 1700 Eastern Standard Time
+      Contact_Instructions: Monday through Friday, except holidays
+  Metadata_Standard_Name: FGDC CSDGM
+  Metadata_Standard_Version: FGDC-STD-001-1998
+  Metadata_Access_Constraints: None
+  Metadata_Use_Constraints:
+    This metadata file is intended to accompany the data set identified and received from the IGS. It should not to be altered or summarized.
+    IGS does not support secondary distribution. If this data set was received from anyone besides the IGS, this metadata file and the data set it describes may lack integrity.

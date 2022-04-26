@@ -312,6 +312,23 @@ tnoremap <F3> :tabprevious<cr>
 inoremap <F3> <esc>:tabprevious<cr>
 nnoremap <F3> :tabprevious<cr>
 
+" create alternate method to rearrange windows
+tnoremap <F9> <c-w>H
+inoremap <F9> <esc><c-w>H
+nnoremap <F9> <c-w>H
+
+tnoremap <F10> <c-w>J
+inoremap <F10> <esc><c-w>J
+nnoremap <F10> <c-w>J
+
+tnoremap <F11> <c-w>K
+inoremap <F11> <esc><c-w>K
+nnoremap <F11> <c-w>K
+
+tnoremap <F12> <c-w>L
+inoremap <F12> <esc><c-w>L
+nnoremap <F12> <c-w>L
+
 let g:repl_height = 20
 let g:repl_position = 3
 
