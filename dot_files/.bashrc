@@ -182,3 +182,6 @@ unset __conda_setup
 alias cond="conda deactivate"
 alias cona="conda activate"
 alias R="R --no-save"
+
+alias light="base16_gruvbox-light-medium"
+alias dark="base16_eighties"
