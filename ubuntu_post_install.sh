@@ -40,3 +40,6 @@ sudo apt install libssl-dev libcurl4-openssl-dev libxml2-dev
 git clone https://github.com/aircrack-ng/rtl8812au.git
 cd rtl8812au/
 sudo make install
+
+# opencl support (check updates to nvidia server etc)
+sudo apt install nvidia-headless-510 opencl-headers
