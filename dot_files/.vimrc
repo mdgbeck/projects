@@ -17,7 +17,7 @@ Plug 'tmsvg/pear-tree'
 Plug 'wincent/terminus', {'frozen': 1}
 Plug 'sillybun/vim-repl', { 'frozen': 1}
 Plug 'mattn/emmet-vim', { 'for': ['html', 'xml'] }
-Plug 'psliwka/vim-smoothie'
+" Plug 'psliwka/vim-smoothie'
 
 " " List ends here. Plugins become visible to Vim after this call.
 call plug#end()
