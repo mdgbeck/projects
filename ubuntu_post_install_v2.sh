@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -eo pipefail
 
 # ─── SSH Setup ───────────────────────────────────────────────────────────────
 sudo apt install -y xclip curl git ssh
@@ -24,6 +24,8 @@ cd ~
 sudo apt install -y gnome-tweaks vim-gtk3
 
 # ─── Dotfile symlinks ─────────────────────────────────────────────────────────
+[ -f ~/.bashrc ] && cp ~/.bashrc ~/.bashrc.bak
+[ -f ~/.vimrc ]  && cp ~/.vimrc ~/.vimrc.bak
 rm -f ~/.bashrc ~/.vimrc
 ln -s ~/Documents/projects/dot_files/.vimrc ~/.vimrc
 ln -s ~/Documents/projects/dot_files/.bashrc ~/.bashrc
@@ -39,20 +41,13 @@ curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
 # Install plugins non-interactively
 vim +PlugInstall +qall
 
-# ─── Terminal color scheme ───────────────────────────────────────────────────
-git clone https://github.com/chriskempson/base16-shell.git ~/.config/base16-shell
-
-# Source base16-shell so the theme command is available without a terminal restart
-# shellcheck disable=SC1090
-source ~/.config/base16-shell/profile_helper.sh
-base16_gruvbox-dark-pale
 
 # ─── R ───────────────────────────────────────────────────────────────────────
-sudo apt-key adv --keyserver keyserver.ubuntu.com \
-    --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xE298A3A825C0D65DFD57CBB651716619E084DAB9" \
+    | sudo gpg --dearmor -o /usr/share/keyrings/cran-archive-keyring.gpg
 
-# Use lsb_release so this works on non-focal Ubuntu releases too
-sudo add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
+echo "deb [signed-by=/usr/share/keyrings/cran-archive-keyring.gpg] https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/" \
+    | sudo tee /etc/apt/sources.list.d/cran.list
 sudo apt update
 sudo apt install -y r-base
 
@@ -63,8 +58,8 @@ ln -s ~/Documents/projects/dot_files/.Rprofile ~/.Rprofile
 
 # ─── Python ──────────────────────────────────────────────────────────────────
 sudo apt install -y python3-pip
-pip3 install pipenv
-sudo pip3 install ipython
+pip3 install --user pipenv
+pip3 install --user ipython
 
 # ─── SSH config ──────────────────────────────────────────────────────────────
 # Open SSH config for editing if it doesn't already exist / needs setup
@@ -81,9 +76,8 @@ sudo make install
 cd ~
 
 # ─── OpenCL / NVIDIA (headless) ──────────────────────────────────────────────
-# Check https://ubuntu.com/server/docs/nvidia-drivers-installation for the
-# latest recommended driver version before running this section.
-sudo apt install -y nvidia-headless-510 opencl-headers
+sudo ubuntu-drivers autoinstall
+sudo apt install -y opencl-headers
 
 echo ""
 echo "Setup complete."
