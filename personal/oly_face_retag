@@ -1,0 +1,191 @@
+#!/home/michael/.venvs/face_rec/bin/python3
+"""
+Re-run face recognition on an already-imported event folder and write
+person tags to RAW XMP sidecars, or directly to JPGs if no RAW files exist.
+
+Works with any camera (Olympus ORF, Nikon NEF, Canon CR2, JPG-only, etc.).
+
+Usage:
+  oly_face_retag <dir> [<jpg_dir>]
+
+  dir      — folder containing RAW files (with XMP sidecars) or JPGs
+  jpg_dir  — folder containing JPGs for face detection (optional: auto-detected
+             or same as dir if JPG-only)
+
+Examples:
+  oly_face_retag /media/michael/blue_wd/pictures/olympus/raw/2026-03-26-FunRunEtc/
+  oly_face_retag /media/michael/blue_wd/pictures/dslr/RAW/2025-02-25-GroesbeckFeb/
+  oly_face_retag /path/to/jpgs/EVENT/
+  oly_face_retag /path/to/raw/EVENT/ /path/to/jpg/EVENT/
+"""
+
+import face_recognition
+import pickle
+import subprocess
+import sys
+from pathlib import Path
+
+DB_PATH = Path.home() / ".config/oly_face/encodings.pkl"
+TOLERANCE = 0.5
+RAW_EXTENSIONS = {".orf", ".nef", ".cr2", ".cr3", ".arw", ".rw2", ".dng"}
+
+
+def load_db():
+    if not DB_PATH.exists():
+        print(f"Error: face database not found at {DB_PATH}")
+        print("Run oly_face_setup first to build the database.")
+        sys.exit(1)
+    with open(DB_PATH, "rb") as f:
+        return pickle.load(f)
+
+
+def detect_raw_extension(directory):
+    """Find the RAW file extension used in this directory, or None if JPG-only."""
+    for f in directory.iterdir():
+        if f.suffix.lower() in RAW_EXTENSIONS:
+            return f.suffix.lower()
+    return None
+
+
+def find_jpg_dir(raw_dir):
+    """Try to auto-detect the corresponding JPG directory."""
+    event = raw_dir.name
+    parent = raw_dir.parent
+    for jpg_sibling in ["jpg", "JPG", "JPGS", "Jpgs", "jpeg", "JPEG"]:
+        candidate = parent.parent / jpg_sibling / event
+        if candidate.is_dir():
+            return candidate
+    return None
+
+
+def find_jpg(stem, jpg_dir):
+    """Find a JPG by stem name in a directory."""
+    for ext in [".jpg", ".JPG"]:
+        candidate = jpg_dir / (stem + ext)
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def recognize_faces(jpg_path, db):
+    """Return sorted list of matched person tags for an image."""
+    try:
+        image = face_recognition.load_image_file(str(jpg_path))
+    except Exception as e:
+        print(f"  Could not load {jpg_path.name}: {e}")
+        return []
+
+    unknown_encodings = face_recognition.face_encodings(image)
+    if not unknown_encodings:
+        return []
+
+    matched = set()
+    for unknown_enc in unknown_encodings:
+        for tag, known_encs in db.items():
+            results = face_recognition.compare_faces(known_encs, unknown_enc, tolerance=TOLERANCE)
+            if any(results):
+                matched.add(tag)
+
+    return sorted(matched)
+
+
+def write_tags(target_path, tags):
+    """Write person tags to a file (JPG or XMP sidecar), creating XMP if needed."""
+    flat = set()
+    for tag in tags:
+        flat.update(tag.split("|"))
+
+    args = ["exiftool", "-overwrite_original"]
+    for t in sorted(flat):
+        args.append(f"-XMP-dc:Subject+={t}")
+    for t in tags:
+        args.append(f"-XMP-lr:HierarchicalSubject+={t}")
+    args.append(str(target_path))
+
+    result = subprocess.run(args, capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"  exiftool error ({target_path.name}): {result.stderr.strip()}")
+
+
+def main():
+    if len(sys.argv) < 2 or len(sys.argv) > 3:
+        print("Usage: oly_face_retag <dir> [<jpg_dir>]")
+        sys.exit(1)
+
+    target_dir = Path(sys.argv[1]).resolve()
+    if not target_dir.is_dir():
+        print(f"Error: {target_dir} is not a directory")
+        sys.exit(1)
+
+    raw_ext = detect_raw_extension(target_dir)
+    jpg_only = raw_ext is None
+
+    if jpg_only:
+        # JPG-only mode: detect and tag JPGs directly
+        jpg_dir = target_dir
+        print(f"No RAW files found — running in JPG-only mode")
+    else:
+        # RAW mode: use JPGs for detection, write to XMP sidecars
+        if len(sys.argv) == 3:
+            jpg_dir = Path(sys.argv[2]).resolve()
+        else:
+            jpg_dir = find_jpg_dir(target_dir)
+
+        if jpg_dir is None or not jpg_dir.is_dir():
+            print(f"Error: could not find JPG directory for {target_dir.name}")
+            print("Pass it explicitly: oly_face_retag <raw_dir> <jpg_dir>")
+            sys.exit(1)
+
+    db = load_db()
+    total_enc = sum(len(v) for v in db.values())
+    print(f"Database: {len(db)} people, {total_enc} encodings")
+    if not jpg_only:
+        print(f"Raw dir:  {target_dir}")
+        print(f"JPG dir:  {jpg_dir}")
+        print(f"Format:   {raw_ext.upper()}")
+    else:
+        print(f"JPG dir:  {jpg_dir}")
+    print()
+
+    if jpg_only:
+        files = sorted(jpg_dir.glob("*.jpg")) + sorted(jpg_dir.glob("*.JPG"))
+    else:
+        files = sorted(target_dir.glob(f"*{raw_ext}")) + sorted(target_dir.glob(f"*{raw_ext.upper()}"))
+
+    if not files:
+        print("No files found.")
+        sys.exit(0)
+
+    print(f"Processing {len(files)} files...\n")
+
+    tagged = 0
+    no_jpg = 0
+    for f in files:
+        if jpg_only:
+            jpg = f
+        else:
+            jpg = find_jpg(f.stem, jpg_dir)
+            if jpg is None:
+                no_jpg += 1
+                continue
+
+        tags = recognize_faces(jpg, db)
+        if not tags:
+            continue
+
+        if jpg_only:
+            target = f
+        else:
+            target = f.parent / (f.name + ".xmp")
+
+        write_tags(target, tags)
+        print(f"  {f.name}: {', '.join(tags)}")
+        tagged += 1
+
+    print(f"\nTagged {tagged}/{len(files)} files with recognized faces.")
+    if no_jpg > 0:
+        print(f"Skipped {no_jpg} files (no corresponding JPG found).")
+
+
+if __name__ == "__main__":
+    main()

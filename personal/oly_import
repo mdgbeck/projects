@@ -1,0 +1,48 @@
+#!/bin/bash
+
+set -e
+
+if [ -z "$1" ]; then
+    echo "Usage: oly_import <EventName>"
+    exit 1
+fi
+
+d=$(date +%Y-%m-%d)
+exdir=/media/michael/blue_wd/pictures/olympus
+viddir=/media/michael/blue_wd/videos
+sd_path=(/media/michael/*/DCIM/100OLYMP/)
+sddir="${sd_path[0]}"
+
+if [ ! -d "$sddir" ]; then
+    echo "Error: SD card not found. Is it mounted?"
+    exit 1
+fi
+
+# import jpgs
+mkdir "$exdir/jpg/$d-$1"
+cd "$exdir/jpg/$d-$1"
+echo "copying jpgs to $(pwd)"
+cp -v "$sddir"/*.JPG ./
+exiftool '-filename<CreateDate' -d %Y%m%d_%H%M%S%%-c.%%le -r -ext JPG ./
+
+# import raw files
+mkdir "$exdir/raw/$d-$1"
+cd "$exdir/raw/$d-$1"
+echo "copying raws to $(pwd)"
+cp -v "$sddir"/*.ORF ./
+exiftool '-filename<CreateDate' -d %Y%m%d_%H%M%S%%-c.%%le -r -ext ORF ./
+
+# tag faces in imported raws
+echo "running face recognition..."
+oly_face_tag "$(pwd)" || echo "Warning: face recognition failed, continuing import"
+
+# import movies
+echo "checking for movies"
+count=$(ls -1 "$sddir"/*.MOV 2>/dev/null | wc -l)
+echo "$count movies found"
+if [ "$count" != 0 ]; then
+    mkdir "$viddir/$d-$1"
+    cd "$viddir/$d-$1"
+    echo "copying movies to $(pwd)"
+    cp -v "$sddir"/*.MOV ./
+fi

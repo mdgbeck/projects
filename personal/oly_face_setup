@@ -1,0 +1,242 @@
+#!/home/michael/.venvs/face_rec/bin/python3
+"""
+Build face recognition database from already-tagged photos.
+
+Scans XMP sidecars for family|* and extfam|* tags, finds corresponding
+JPGs (or extracts RAW previews), and saves face encodings to a pickle file.
+
+Only uses photos with exactly 1 face and 1 person tag to avoid ambiguity.
+Runs in parallel across multiple CPUs. Saves periodically so Ctrl+C is safe.
+
+Usage: oly_face_setup [--jobs N]
+"""
+
+import argparse
+import face_recognition
+import multiprocessing
+import os
+import pickle
+import signal
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+from xml.etree import ElementTree as ET
+
+DB_PATH = Path.home() / ".config/oly_face/encodings.pkl"
+SEEN_PATH = Path.home() / ".config/oly_face/seen.pkl"
+SAVE_INTERVAL = 25  # save after every N completed images
+
+SOURCES = [
+    {
+        "raw": Path("/media/michael/blue_wd/pictures/dslr/RAW"),
+        "jpg": Path("/media/michael/blue_wd/pictures/dslr/JPGS"),
+        "raw_ext": ".nef",
+    },
+    {
+        "raw": Path("/media/michael/blue_wd/pictures/olympus/raw"),
+        "jpg": Path("/media/michael/blue_wd/pictures/olympus/jpg"),
+        "raw_ext": ".orf",
+    },
+]
+
+
+def person_tags_from_xmp(xmp_path):
+    """Return list of 'family|name' or 'extfam|name' tags from an XMP file."""
+    try:
+        tree = ET.parse(xmp_path)
+    except ET.ParseError:
+        return []
+    tags = []
+    for li in tree.iter("{http://www.w3.org/1999/02/22-rdf-syntax-ns#}li"):
+        t = (li.text or "").strip()
+        if "|" in t and (t.startswith("family|") or t.startswith("extfam|")):
+            tags.append(t)
+    return tags
+
+
+def find_jpg(xmp_path, raw_ext, jpg_root):
+    """Find corresponding JPG for an XMP sidecar, or None."""
+    name = xmp_path.name
+    stem = None
+    for suffix in [raw_ext + ".xmp", raw_ext.upper() + ".xmp"]:
+        if name.lower().endswith(suffix.lower()):
+            stem = name[: -len(suffix)]
+            break
+    if stem is None:
+        stem = xmp_path.stem
+
+    event = xmp_path.parent.name
+    for ext in [".jpg", ".JPG"]:
+        candidate = jpg_root / event / (stem + ext)
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def extract_preview(raw_path):
+    """Extract embedded preview JPEG from RAW using exiftool. Returns temp path or None."""
+    tmp = tempfile.NamedTemporaryFile(suffix=".jpg", delete=False)
+    tmp.close()
+    result = subprocess.run(
+        ["exiftool", "-b", "-PreviewImage", str(raw_path)],
+        capture_output=True,
+    )
+    if result.returncode == 0 and len(result.stdout) > 1000:
+        with open(tmp.name, "wb") as f:
+            f.write(result.stdout)
+        return tmp.name
+    os.unlink(tmp.name)
+    return None
+
+
+def process_image(args):
+    """Worker function: load image and compute face encodings. Must be top-level for multiprocessing."""
+    xmp_str, img_str, tags, is_tmp = args
+    try:
+        image = face_recognition.load_image_file(img_str)
+        encodings = face_recognition.face_encodings(image)
+        return (xmp_str, encodings, tags, None)
+    except Exception as e:
+        return (xmp_str, None, tags, str(e))
+    finally:
+        if is_tmp:
+            try:
+                os.unlink(img_str)
+            except OSError:
+                pass
+
+
+def save(db, seen):
+    with open(DB_PATH, "wb") as f:
+        pickle.dump(db, f)
+    with open(SEEN_PATH, "wb") as f:
+        pickle.dump(seen, f)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--jobs", type=int, default=max(1, multiprocessing.cpu_count() - 2),
+                        help="Number of parallel workers (default: cpu_count - 2)")
+    args = parser.parse_args()
+
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+    if DB_PATH.exists():
+        with open(DB_PATH, "rb") as f:
+            db = pickle.load(f)
+        total_enc = sum(len(v) for v in db.values())
+        print(f"Loaded existing database: {len(db)} people, {total_enc} encodings")
+    else:
+        db = {}
+
+    if SEEN_PATH.exists():
+        with open(SEEN_PATH, "rb") as f:
+            seen = pickle.load(f)
+        print(f"Skipping {len(seen)} already-processed files")
+    else:
+        seen = set()
+
+    # Collect all candidate work items upfront
+    work = []
+    skipped_multi = 0
+
+    for source in SOURCES:
+        raw_root = source["raw"]
+        jpg_root = source["jpg"]
+        raw_ext = source["raw_ext"]
+
+        if not raw_root.exists():
+            print(f"Skipping {raw_root} (not mounted or not found)")
+            continue
+
+        xmp_files = sorted(raw_root.rglob("*.xmp"))
+        print(f"Scanning {len(xmp_files)} XMP files in {raw_root.name}/...")
+
+        for xmp_path in xmp_files:
+            if str(xmp_path) in seen:
+                continue
+
+            tags = person_tags_from_xmp(xmp_path)
+            if not tags:
+                seen.add(str(xmp_path))
+                continue
+
+            if len(tags) > 1:
+                seen.add(str(xmp_path))
+                skipped_multi += 1
+                continue
+
+            img_path = find_jpg(xmp_path, raw_ext, jpg_root)
+            is_tmp = False
+            if img_path is None:
+                raw_path = xmp_path.with_suffix("")
+                if raw_path.exists():
+                    tmp = extract_preview(raw_path)
+                    if tmp:
+                        img_path = tmp
+                        is_tmp = True
+            if img_path is None:
+                seen.add(str(xmp_path))
+                continue
+
+            work.append((str(xmp_path), str(img_path), tags, is_tmp))
+
+    print(f"\n{len(work)} images to process using {args.jobs} workers")
+    print(f"(saves every {SAVE_INTERVAL} completions — Ctrl+C is safe)\n")
+
+    added = 0
+    skipped_no_face = 0
+    skipped_multi_faces = 0
+    completed = 0
+
+    # Handle Ctrl+C gracefully
+    interrupted = False
+    def handle_sigint(sig, frame):
+        nonlocal interrupted
+        interrupted = True
+        print("\nInterrupted — saving progress...")
+
+    signal.signal(signal.SIGINT, handle_sigint)
+
+    with multiprocessing.Pool(processes=args.jobs) as pool:
+        for xmp_str, encodings, tags, error in pool.imap_unordered(process_image, work):
+            if interrupted:
+                pool.terminate()
+                break
+
+            seen.add(xmp_str)
+            completed += 1
+
+            if error:
+                print(f"  Error {Path(xmp_str).name}: {error}")
+            elif encodings is None or len(encodings) == 0:
+                skipped_no_face += 1
+            elif len(encodings) > 1:
+                skipped_multi_faces += 1
+            else:
+                tag = tags[0]
+                db.setdefault(tag, []).append(encodings[0])
+                added += 1
+                print(f"  +1  {tag:30s}  {Path(xmp_str).name}")
+
+            if completed % SAVE_INTERVAL == 0:
+                save(db, seen)
+                print(f"  [{completed}/{len(work)} saved]")
+
+    save(db, seen)
+
+    if not interrupted:
+        print(f"\nDone. Processed {completed} images")
+        print(f"Added {added} encodings, skipped {skipped_no_face} (no face), {skipped_multi + skipped_multi_faces} (multiple faces/tags)")
+        print(f"\nDatabase summary:")
+        for person, encs in sorted(db.items()):
+            print(f"  {person}: {len(encs)} encodings")
+    else:
+        print(f"Saved after {completed} images. Re-run to continue.")
+
+    print(f"\nSaved to {DB_PATH}")
+
+
+if __name__ == "__main__":
+    main()

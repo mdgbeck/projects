@@ -1,0 +1,129 @@
+#!/home/michael/.venvs/face_rec/bin/python3
+"""
+Recognize faces in imported photos and write person tags to ORF XMP sidecars.
+
+Uses the corresponding JPGs for face detection (face_recognition can't read RAW),
+but only writes tags to the XMP sidecar files in the raw directory.
+Creates XMP sidecars if they don't exist yet.
+
+Called automatically by oly_import after ORFs are copied and renamed.
+
+Usage: oly_face_tag <raw_dir>
+  e.g. oly_face_tag /media/michael/blue_wd/pictures/olympus/raw/2026-03-27-Event/
+"""
+
+import face_recognition
+import pickle
+import subprocess
+import sys
+from pathlib import Path
+
+DB_PATH = Path.home() / ".config/oly_face/encodings.pkl"
+OLY_JPG = Path("/media/michael/blue_wd/pictures/olympus/jpg")
+OLY_RAW = Path("/media/michael/blue_wd/pictures/olympus/raw")
+
+TOLERANCE = 0.5
+
+
+def load_db():
+    if not DB_PATH.exists():
+        print(f"Warning: face database not found at {DB_PATH}")
+        print("Run oly_face_setup first to build the database.")
+        sys.exit(1)
+    with open(DB_PATH, "rb") as f:
+        return pickle.load(f)
+
+
+def find_jpg(orf_path):
+    """Find the corresponding JPG for an ORF file."""
+    event = orf_path.parent.name
+    stem = orf_path.stem
+    for ext in [".jpg", ".JPG"]:
+        candidate = OLY_JPG / event / (stem + ext)
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def recognize_faces(jpg_path, db):
+    """Return sorted list of matched person tags for an image."""
+    try:
+        image = face_recognition.load_image_file(str(jpg_path))
+    except Exception as e:
+        print(f"  Could not load {jpg_path.name}: {e}")
+        return []
+
+    unknown_encodings = face_recognition.face_encodings(image)
+    if not unknown_encodings:
+        return []
+
+    matched = set()
+    for unknown_enc in unknown_encodings:
+        for tag, known_encs in db.items():
+            results = face_recognition.compare_faces(known_encs, unknown_enc, tolerance=TOLERANCE)
+            if any(results):
+                matched.add(tag)
+
+    return sorted(matched)
+
+
+def write_tags_to_xmp(xmp_path, tags):
+    """Write person tags to an XMP sidecar, creating it if needed."""
+    flat = set()
+    for tag in tags:
+        flat.update(tag.split("|"))
+
+    args = ["exiftool", "-overwrite_original"]
+    for t in sorted(flat):
+        args.append(f"-XMP-dc:Subject+={t}")
+    for t in tags:
+        args.append(f"-XMP-lr:HierarchicalSubject+={t}")
+    args.append(str(xmp_path))
+
+    result = subprocess.run(args, capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"  exiftool error ({xmp_path.name}): {result.stderr.strip()}")
+
+
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: oly_face_tag <raw_dir>")
+        sys.exit(1)
+
+    raw_dir = Path(sys.argv[1])
+    if not raw_dir.is_dir():
+        print(f"Error: {raw_dir} is not a directory")
+        sys.exit(1)
+
+    db = load_db()
+    total_enc = sum(len(v) for v in db.values())
+    print(f"Database: {len(db)} people, {total_enc} encodings")
+
+    orfs = sorted(raw_dir.glob("*.orf")) + sorted(raw_dir.glob("*.ORF"))
+    if not orfs:
+        print("No ORF files found.")
+        sys.exit(0)
+
+    print(f"Processing {len(orfs)} ORFs...\n")
+
+    tagged = 0
+    for orf in orfs:
+        jpg = find_jpg(orf)
+        if jpg is None:
+            print(f"  {orf.name}: no corresponding JPG found, skipping")
+            continue
+
+        tags = recognize_faces(jpg, db)
+        if not tags:
+            continue
+
+        xmp_path = orf.parent / (orf.name + ".xmp")
+        write_tags_to_xmp(xmp_path, tags)
+        print(f"  {orf.name}: {', '.join(tags)}")
+        tagged += 1
+
+    print(f"\nTagged {tagged}/{len(orfs)} ORFs with recognized faces.")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+echo "syncing pictures..."
+rsync -a --info=progress2 /media/michael/blue_wd/pictures/ hpserv:/mnt/intbk/personal_bkup/pictures/
+
+echo "syncing face database..."
+rsync -a --info=progress2 ~/.config/oly_face/ hpserv:/mnt/intbk/personal_bkup/oly_face/
+
+echo "done."

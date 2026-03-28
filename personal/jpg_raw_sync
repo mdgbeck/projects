@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# code via gemini
+# Assign input arguments to descriptive variables
+SOURCE_DIR="${1:-}"
+TARGET_DIR="${2:-}"
+
+# 1. Error Checking: Ensure both arguments are provided
+if [[ -z "$SOURCE_DIR" || -z "$TARGET_DIR" ]]; then
+    echo "Usage: $0 <source_directory> <target_directory>"
+    exit 1
+fi
+
+# 2. Error Checking: Ensure paths are actual directories
+if [[ ! -d "$SOURCE_DIR" ]]; then
+    echo "Error: Source directory '$SOURCE_DIR' does not exist."
+    exit 1
+fi
+
+if [[ ! -d "$TARGET_DIR" ]]; then
+    echo "Error: Target directory '$TARGET_DIR' does not exist."
+    exit 1
+fi
+
+echo "Cleaning target: $TARGET_DIR based on source: $SOURCE_DIR"
+
+# Iterate over files in the target directory
+for target_file in "$TARGET_DIR"/*; do
+    # Skip if it's not a file (handles directories and empty globs)
+    [[ -f "$target_file" ]] || continue
+
+    # Extract the filename and remove the extension
+    filename=$(basename "$target_file")
+    basename="${filename%.*}"
+
+    # Check if ANY file with that base name exists in the source
+    # The glob "$SOURCE_DIR/$basename".* checks for matches regardless of extension
+    if ! ls "$SOURCE_DIR/$basename".* >/dev/null 2>&1; then
+        echo "Deleting: $target_file (No match for '$basename' in source)"
+        rm "$target_file"  # Uncomment to enable deletion
+    fi
+done
+

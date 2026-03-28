@@ -1,0 +1,34 @@
+#!/bin/bash
+# Builds dlib from source with CUDA support and installs it into the face_rec venv.
+# Run this once whenever you need to upgrade dlib or after a CUDA change.
+
+set -e
+
+DLIB_VERSION="20.0.0"
+VENV=~/.venvs/face_rec
+CUDA_ROOT=/usr/local/cuda
+BUILD_DIR=/tmp/dlib_cuda_build
+
+echo "==> Cleaning up any previous build..."
+rm -rf "$BUILD_DIR"
+mkdir -p "$BUILD_DIR"
+cd "$BUILD_DIR"
+
+echo "==> Downloading dlib $DLIB_VERSION source..."
+"$VENV/bin/pip" download "dlib==$DLIB_VERSION" --no-binary dlib --no-deps -d .
+tar -xf "dlib-${DLIB_VERSION}.tar.gz"
+cd "dlib-${DLIB_VERSION}"
+
+echo "==> Building and installing with CUDA enabled..."
+"$VENV/bin/pip" uninstall dlib -y
+"$VENV/bin/python3" setup.py install \
+    --set DLIB_USE_CUDA=ON \
+    --set CUDA_TOOLKIT_ROOT_DIR="$CUDA_ROOT"
+
+echo "==> Verifying CUDA support..."
+"$VENV/bin/python3" -c "import dlib; print('DLIB_USE_CUDA:', dlib.DLIB_USE_CUDA)"
+
+echo "==> Cleaning up build directory..."
+rm -rf "$BUILD_DIR"
+
+echo "Done."
