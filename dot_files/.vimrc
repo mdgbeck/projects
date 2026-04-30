@@ -9,7 +9,6 @@ Plug 'tpope/vim-sensible'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-commentary'
-Plug 'chriskempson/base16-vim'
 Plug 'scrooloose/nerdtree'
 " Plug 'ycm-core/YouCompleteMe'
 Plug 'ajh17/VimCompletesMe'
@@ -35,17 +34,6 @@ let localleader="\\"
 nnoremap <leader>d :NERDTreeToggle<cr>
 " let g:sendtorepl_invoke_key = "<leader>e"
 
-" switched for easy toggle
-if &background ==# 'light'
-    " colo base16-atelier-dune-light
-    colo base16-gruvbox-light-medium
-else
-    colo base16-eighties
-endif
-
-
-nnoremap <leader>b :set background=light<cr>:source $MYVIMRC<cr>
-nnoremap <leader>n :set background=dark<cr>:source $MYVIMRC<cr>
 
 set statusline=
 set statusline+=%#PmenuSel#
