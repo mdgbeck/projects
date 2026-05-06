@@ -119,3 +119,5 @@ alias clt='vim ~/Documents/projects/clt_traffic/log'
 alias R="R --no-save"
 
 export PATH="$HOME/.local/bin:$PATH"
+
+PS1='\[\e[32m\]\u\[\e[0m\]:\[\e[34m\]\W\[\e[0m\]\$ '
