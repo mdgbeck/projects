@@ -91,6 +91,9 @@ set -o vi
 
 alias c='clear'
 alias p='pwd'
+alias eal='vim ~/Documents/projects/dot_files/alacritty.toml'
+alias tm='tmux attach -t 2>/dev/null || tmux new -s'
+alias tl='tmux ls'
 
 export PATH="$HOME/.local/bin:$PATH"
 
