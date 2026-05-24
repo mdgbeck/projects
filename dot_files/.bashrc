@@ -51,10 +51,6 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 
-# Add an "alert" alias for long running commands.  Use like so:
-#   sleep 10; alert
-alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
-
 # Alias definitions.
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
@@ -82,41 +78,19 @@ alias gc='git commit'
 alias gcm='git commit --message'
 alias gd='git diff'
 alias gs='git status'
-alias gpom='git push origin master'
+alias gpom='git push origin HEAD'
 
 # add bash alias
 alias p3='python3'
 
-# add alias for sudo docker
-alias sd='sudo docker'
-
-# alias for bash history
-alias bh='vim ~/.bash_history'
-
-# alias for recipe directory
-alias wr='cd ~/Documents/website2/content/recipes/'
-
+# change owner to user on all files in folder and change permissions
+alias cha='sudo chown -R $USER:$USER ./;'
 
 # enable vim editing mode
 set -o vi
 
-
 alias c='clear'
 alias p='pwd'
-alias pi='pipenv shell'
-
-# change owner to user on all files in folder and change permissions
-alias cha='sudo chown -R $USER:$USER ./;'
-
-# alias to exec into doccker for cse
-alias exbb='sudo docker start bigbox_old; sudo docker exec -it bigbox_old /bin/bash'
-
-alias csedock='sudo docker start csebigbox; sudo docker exec -it csebigbox /bin/bash'
-
-alias gt='cd ~/Documents/gatech/dva_cse6242/'
-alias clt='vim ~/Documents/projects/clt_traffic/log'
-
-alias R="R --no-save"
 
 export PATH="$HOME/.local/bin:$PATH"
 
