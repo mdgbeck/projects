@@ -62,6 +62,8 @@ hi CursorLine cterm=NONE
 " display command in corner
 set showcmd
 
+set mouse=a
+
 " highlight current line
 augroup BgHighlight
     autocmd!
@@ -171,3 +173,4 @@ nnoremap <silent> <leader>y :let @+=@"<cr>
 
 " create mapping to print current directory
 nnoremap <leader>p :pwd<cr>
+nnoremap <leader>d :!cp % /run/media/michael/CIRCUITPY/code.py<cr>
