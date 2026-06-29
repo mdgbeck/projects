@@ -9,19 +9,11 @@ Plug 'tpope/vim-sensible'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-commentary'
-Plug 'morhetz/gruvbox'
 Plug 'christoomey/vim-tmux-navigator'
 
 " " List ends here. Plugins become visible to Vim after this call.
 call plug#end()
 
-set termguicolors
-set background=light
-let g:gruvbox_contrast_light = 'medium'
-let g:gruvbox_contrast_dark = 'light'
-let g:gruvbox_bold = 0
-colorscheme gruvbox
-nnoremap <silent> <leader>bg :let &background = (&background == 'dark' ? 'light' : 'dark') \| colorscheme gruvbox<cr>
 
 " cursor shape per mode
 let &t_SI = "\e[6 q"
