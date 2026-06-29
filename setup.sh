@@ -21,6 +21,8 @@ git config --global user.name "Michael Groesbeck"
 git config --global user.email "github.tech@704mail.com"
 
 # ── SSH key ────────────────────────────────────────────────────────────────────
+sudo dnf install -y wl-clipboard
+
 if [ ! -f "$HOME/.ssh/id_ed25519" ]; then
     info "Generating SSH key..."
     ssh-keygen -t ed25519 -C "github.tech@704mail.com" -f "$HOME/.ssh/id_ed25519" -N ""
@@ -30,6 +32,8 @@ info "Your public SSH key:"
 echo ""
 cat "$HOME/.ssh/id_ed25519.pub"
 echo ""
+wl-copy < "$HOME/.ssh/id_ed25519.pub"
+info "Key copied to clipboard."
 warn "Add the above key to GitHub: https://github.com/settings/ssh/new"
 read -rp "Press Enter once the key has been added to GitHub..."
 
