@@ -69,7 +69,7 @@ vim +PlugInstall +qall
 
 # ── npm globals ────────────────────────────────────────────────────────────────
 info "Installing global npm packages..."
-npm install -g @anthropic-ai/claude-code
+sudo npm install -g @anthropic-ai/claude-code
 
 # ── Flatpak ────────────────────────────────────────────────────────────────────
 info "Installing Flatpak apps..."
