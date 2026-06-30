@@ -96,7 +96,7 @@ tm() { tmux attach -t "$1" 2>/dev/null || tmux new -s "$1"; }
 alias tl='tmux ls'
 alias pico='sudo picocom /dev/ttyACM0 -b 115200'
 
-alias update_all='sudo dnf update && flatpak update && npm update -g'
+alias update_all='sudo dnf update && flatpak update && sudo npm update -g'
 
 export PATH="$HOME/.local/bin:$PATH"
 
