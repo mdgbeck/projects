@@ -1,0 +1,124 @@
+#!/home/michael/.venvs/face_rec/bin/python3
+"""
+Compute pairwise face similarity scores between all photos in a directory.
+
+Useful for understanding the similarity distribution for the same person across
+different photos — helps calibrate DIVERSITY_THRESHOLD in face_db_setup.
+
+Only uses photos where exactly 1 face is detected.
+
+Usage: face_sim_test [<dir>]
+  dir  — directory of JPG images (default: /media/michael/blue_wd/pictures/face_sim_test)
+"""
+
+import os
+import sys
+
+_cudnn_lib = os.path.join(sys.prefix,
+    f"lib/python{sys.version_info.major}.{sys.version_info.minor}/site-packages/nvidia/cudnn/lib")
+if os.path.isdir(_cudnn_lib) and _cudnn_lib not in os.environ.get("LD_LIBRARY_PATH", ""):
+    os.environ["LD_LIBRARY_PATH"] = _cudnn_lib + ":" + os.environ.get("LD_LIBRARY_PATH", "")
+    os.execv(sys.executable, [sys.executable, __file__] + sys.argv[1:])
+
+import cv2
+import numpy as np
+from insightface.app import FaceAnalysis
+from pathlib import Path
+
+DEFAULT_DIR = Path("/media/michael/blue_wd/pictures/face_sim_test")
+
+
+def main():
+    if len(sys.argv) > 2:
+        print("Usage: face_sim_test [<dir>]")
+        sys.exit(1)
+
+    test_dir = Path(sys.argv[1]).resolve() if len(sys.argv) == 2 else DEFAULT_DIR
+    if not test_dir.is_dir():
+        print(f"Error: {test_dir} is not a directory")
+        sys.exit(1)
+
+    print("Initializing InsightFace (buffalo_l)...")
+    app = FaceAnalysis(name="buffalo_l", providers=["CUDAExecutionProvider", "CPUExecutionProvider"])
+    app.prepare(ctx_id=0, det_size=(1280, 1280))
+    print()
+
+    jpgs = sorted(test_dir.glob("*.jpg")) + sorted(test_dir.glob("*.JPG"))
+    if not jpgs:
+        print(f"No JPG files found in {test_dir}")
+        sys.exit(0)
+
+    names = []
+    embeddings = []
+    skipped = []
+
+    for jpg in jpgs:
+        img = cv2.imread(str(jpg))
+        if img is None:
+            skipped.append((jpg.name, "could not load"))
+            continue
+        faces = app.get(img)
+        if len(faces) == 0:
+            skipped.append((jpg.name, "no face detected"))
+        elif len(faces) > 1:
+            skipped.append((jpg.name, f"{len(faces)} faces detected"))
+        else:
+            names.append(jpg.name)
+            embeddings.append(faces[0].normed_embedding)  # 512-dim, L2-normalized
+
+    print(f"Accepted {len(names)}/{len(jpgs)} photos (single face detected)")
+    if skipped:
+        print("Skipped:")
+        for name, reason in skipped:
+            print(f"  {name}: {reason}")
+    print()
+
+    if len(names) < 2:
+        print("Need at least 2 accepted photos to compute similarities.")
+        sys.exit(0)
+
+    # Compute full pairwise similarity matrix
+    mat = np.stack(embeddings)       # (N, 512)
+    sim = mat @ mat.T                # (N, N) cosine similarities
+
+    # Similarity matrix header
+    col_w = 8
+    labels = [n[:6] for n in names]  # 6-char shortened labels
+
+    header = " " * 24 + "  ".join(f"{l:>{col_w}}" for l in labels)
+    print("Similarity matrix:")
+    print(header)
+    for i, name in enumerate(names):
+        row = "  ".join(f"{sim[i, j]:>{col_w}.4f}" for j in range(len(names)))
+        print(f"  {name:<22s}  {row}")
+    print()
+
+    # Per-photo stats (excluding self-similarity on diagonal)
+    print("Per-photo stats (excluding self):")
+    for i, name in enumerate(names):
+        others = [sim[i, j] for j in range(len(names)) if j != i]
+        print(f"  {name:<35s}  min={min(others):.4f}  max={max(others):.4f}  mean={np.mean(others):.4f}")
+    print()
+
+    # Overall stats across all unique pairs
+    pairs = [sim[i, j] for i in range(len(names)) for j in range(i + 1, len(names))]
+    print(f"Overall ({len(pairs)} pairs):  min={min(pairs):.4f}  max={max(pairs):.4f}  mean={np.mean(pairs):.4f}")
+    print()
+
+    # Distribution histogram in 0.05-wide buckets
+    lo = max(0.0, (min(pairs) // 0.05) * 0.05)
+    hi = min(1.0, ((max(pairs) // 0.05) + 1) * 0.05)
+    buckets = np.arange(lo, hi + 0.001, 0.05)
+    counts, _ = np.histogram(pairs, bins=buckets)
+    bar_scale = max(counts) / 40 if max(counts) > 40 else 1
+
+    print("Distribution:")
+    for k, count in enumerate(counts):
+        lo_b = buckets[k]
+        hi_b = buckets[k + 1]
+        bar = "|" * int(count / bar_scale)
+        print(f"  {lo_b:.2f}–{hi_b:.2f}:  {count:3d} pairs  {bar}")
+
+
+if __name__ == "__main__":
+    main()

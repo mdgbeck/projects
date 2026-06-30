@@ -1,0 +1,286 @@
+#!/home/michael/.venvs/face_rec/bin/python3
+"""
+Re-run face recognition on an already-imported event folder and write
+person tags to RAW XMP sidecars, or directly to JPGs if no RAW files exist.
+
+Works with any camera (Olympus ORF, Nikon NEF, Canon CR2, JPG-only, etc.).
+
+Usage:
+  gen_face_retag <dir> [<jpg_dir>]
+
+  dir      — folder containing RAW files (with XMP sidecars) or JPGs
+  jpg_dir  — folder containing JPGs for face detection (optional: auto-detected
+             or same as dir if JPG-only)
+
+Examples:
+  gen_face_retag /media/michael/blue_wd/pictures/olympus/raw/2026-03-26-FunRunEtc/
+  gen_face_retag /media/michael/blue_wd/pictures/dslr/RAW/2025-02-25-GroesbeckFeb/
+  gen_face_retag /path/to/jpgs/EVENT/
+  gen_face_retag /path/to/raw/EVENT/ /path/to/jpg/EVENT/
+"""
+
+import os
+import sys
+
+# cuDNN 9 is distributed as a pip package. dlopen reads LD_LIBRARY_PATH from the
+# initial process environment, so we must re-exec with it set if not already present.
+_cudnn_lib = os.path.join(sys.prefix,
+    f"lib/python{sys.version_info.major}.{sys.version_info.minor}/site-packages/nvidia/cudnn/lib")
+if os.path.isdir(_cudnn_lib) and _cudnn_lib not in os.environ.get("LD_LIBRARY_PATH", ""):
+    os.environ["LD_LIBRARY_PATH"] = _cudnn_lib + ":" + os.environ.get("LD_LIBRARY_PATH", "")
+    os.execv(sys.executable, [sys.executable, __file__] + sys.argv[1:])
+
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
+import cv2
+import numpy as np
+import pickle
+import subprocess
+from insightface.app import FaceAnalysis
+from pathlib import Path
+
+DB_PATH = Path("/media/michael/blue_wd/pictures/.face_db/encodings.pkl")
+SIMILARITY_THRESHOLD = 0.38  # minimum cosine similarity for best-match assignment
+MIN_ENCODINGS = 3
+TOP_K_FRACTION = 0.25   # fraction of top similarities to average for scoring
+TOP_K_MIN = 5            # minimum number of top similarities to use
+RAW_EXTENSIONS = {".orf", ".nef", ".cr2", ".cr3", ".arw", ".rw2", ".dng"}
+
+
+def load_db():
+    if not DB_PATH.exists():
+        print(f"Error: face database not found at {DB_PATH}")
+        print("Run face_db_setup first to build the database.")
+        sys.exit(1)
+    with open(DB_PATH, "rb") as f:
+        db = pickle.load(f)
+    filtered = {k: v for k, v in db.items() if len(v) >= MIN_ENCODINGS}
+    skipped = set(db) - set(filtered)
+    if skipped:
+        print(f"Skipping {len(skipped)} people with fewer than {MIN_ENCODINGS} encodings: {', '.join(sorted(skipped))}")
+    return filtered
+
+
+def detect_raw_extension(directory):
+    """Find the RAW file extension used in this directory, or None if JPG-only."""
+    for f in directory.iterdir():
+        if f.suffix.lower() in RAW_EXTENSIONS:
+            return f.suffix.lower()
+    return None
+
+
+def find_jpg_dir(raw_dir):
+    """Try to auto-detect the corresponding JPG directory."""
+    event = raw_dir.name
+    parent = raw_dir.parent
+    for jpg_sibling in ["jpg", "JPG", "JPGS", "Jpgs", "jpeg", "JPEG"]:
+        candidate = parent.parent / jpg_sibling / event
+        if candidate.is_dir():
+            return candidate
+    return None
+
+
+def find_jpg(stem, jpg_dir):
+    """Find a JPG by stem name in a directory."""
+    for ext in [".jpg", ".JPG"]:
+        candidate = jpg_dir / (stem + ext)
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def extract_raw_preview(raw_path):
+    """Extract embedded JPG preview from a RAW file. Returns cv2 image or None."""
+    result = subprocess.run(
+        ["exiftool", "-b", "-PreviewImage", str(raw_path)],
+        capture_output=True,
+    )
+    if result.returncode != 0 or not result.stdout:
+        return None
+    buf = np.frombuffer(result.stdout, dtype=np.uint8)
+    img = cv2.imdecode(buf, cv2.IMREAD_COLOR)
+    return img
+
+
+def recognize_faces(img_or_path, db, app, verbose=False):
+    """Return sorted list of best-match person tags (one per face) for an image."""
+    if isinstance(img_or_path, Path):
+        img = cv2.imread(str(img_or_path))
+    else:
+        img = img_or_path
+    if img is None:
+        return []
+
+    faces = app.get(img)
+    if not faces:
+        return []
+
+    matched = set()
+    for i, face in enumerate(faces):
+        unknown_enc = face.normed_embedding  # 512-dim, L2-normalized
+        if verbose:
+            print(f"  face {i + 1}/{len(faces)}:")
+        best_tag = None
+        best_score = -1.0
+        for tag, known_encs in db.items():
+            known_mat = np.stack(known_encs)                          # (N, 512)
+            sims = known_mat @ unknown_enc                            # (N,) cosine similarities
+            k = min(max(TOP_K_MIN, int(len(sims) * TOP_K_FRACTION)), len(sims))
+            score = float(np.mean(np.partition(sims, -k)[-k:]))      # top-k mean
+            if verbose:
+                status = "MATCH" if score >= SIMILARITY_THRESHOLD else "     "
+                print(f"    {status}  {tag:30s}  top-{k}/{len(sims)} score={score:.4f}")
+            if score > best_score:
+                best_score = score
+                best_tag = tag
+        if best_tag is not None and best_score >= SIMILARITY_THRESHOLD:
+            matched.add(best_tag)
+        elif verbose:
+            print(f"    -> no match (best {best_score:.4f} < threshold {SIMILARITY_THRESHOLD})")
+
+    return sorted(matched)
+
+
+def read_existing_tags(path):
+    """Return (existing_subjects, existing_hierarchical) from a file."""
+    if not path.exists():
+        return set(), set()
+    result = subprocess.run(
+        ["exiftool", "-XMP-dc:Subject", "-XMP-lr:HierarchicalSubject", "-s3", str(path)],
+        capture_output=True, text=True,
+    )
+    subjects = set()
+    hierarchical = set()
+    for line in result.stdout.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        for val in line.split(","):
+            val = val.strip()
+            if "|" in val:
+                hierarchical.add(val)
+            else:
+                subjects.add(val)
+    return subjects, hierarchical
+
+
+def write_tags(target_path, tags):
+    """Write person tags to a file (JPG or XMP sidecar), creating XMP if needed. Skips existing tags."""
+    existing_subjects, existing_hierarchical = read_existing_tags(target_path)
+
+    flat = set()
+    for tag in tags:
+        flat.update(tag.split("|"))
+
+    new_subjects = sorted(flat - existing_subjects)
+    new_hierarchical = [t for t in tags if t not in existing_hierarchical]
+
+    if not new_subjects and not new_hierarchical:
+        return
+
+    args = ["exiftool", "-overwrite_original"]
+    for t in new_subjects:
+        args.append(f"-XMP-dc:Subject+={t}")
+    for t in new_hierarchical:
+        args.append(f"-XMP-lr:HierarchicalSubject+={t}")
+    args.append(str(target_path))
+
+    result = subprocess.run(args, capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"  exiftool error ({target_path.name}): {result.stderr.strip()}")
+
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser(
+        description="Re-run face recognition on an already-imported event folder.")
+    parser.add_argument("dir", help="Folder containing RAW files (with XMP sidecars) or JPGs")
+    parser.add_argument("jpg_dir", nargs="?", default=None,
+                        help="Folder containing JPGs for face detection (optional: auto-detected)")
+    parser.add_argument("--verbose", "-v", action="store_true",
+                        help="Print per-face similarity scores for threshold tuning")
+    args = parser.parse_args()
+    verbose = args.verbose
+
+    target_dir = Path(args.dir).resolve()
+    if not target_dir.is_dir():
+        print(f"Error: {target_dir} is not a directory")
+        sys.exit(1)
+
+    raw_ext = detect_raw_extension(target_dir)
+    jpg_only = raw_ext is None
+
+    if jpg_only:
+        jpg_dir = target_dir
+        print(f"No RAW files found — running in JPG-only mode")
+    else:
+        if args.jpg_dir is not None:
+            jpg_dir = Path(args.jpg_dir).resolve()
+            if not jpg_dir.is_dir():
+                print(f"Error: {jpg_dir} is not a directory")
+                sys.exit(1)
+        else:
+            jpg_dir = find_jpg_dir(target_dir)
+            if jpg_dir is None or not jpg_dir.is_dir():
+                print(f"No JPG directory found — will use embedded RAW previews")
+                jpg_dir = None
+
+    print("Initializing InsightFace (buffalo_l)...")
+    app = FaceAnalysis(name="buffalo_l", providers=["CUDAExecutionProvider", "CPUExecutionProvider"])
+    app.prepare(ctx_id=0, det_size=(1280, 1280))
+
+    db = load_db()
+    total_enc = sum(len(v) for v in db.values())
+    print(f"Database: {len(db)} people, {total_enc} encodings")
+    if not jpg_only:
+        print(f"Raw dir:  {target_dir}")
+        print(f"JPG dir:  {jpg_dir if jpg_dir else '(embedded previews)'}")
+        print(f"Format:   {raw_ext.upper()}")
+    else:
+        print(f"JPG dir:  {jpg_dir}")
+    print()
+
+    if jpg_only:
+        files = sorted(jpg_dir.glob("*.jpg")) + sorted(jpg_dir.glob("*.JPG"))
+    else:
+        files = sorted(target_dir.glob(f"*{raw_ext}")) + sorted(target_dir.glob(f"*{raw_ext.upper()}"))
+
+    if not files:
+        print("No files found.")
+        sys.exit(0)
+
+    print(f"Processing {len(files)} files...\n")
+
+    tagged = 0
+    no_img = 0
+    for f in files:
+        if jpg_only:
+            img = f
+        else:
+            jpg = find_jpg(f.stem, jpg_dir) if jpg_dir else None
+            if jpg is not None:
+                img = jpg
+            else:
+                img = extract_raw_preview(f)
+                if img is None:
+                    print(f"  {f.name}: no JPG or preview found, skipping")
+                    no_img += 1
+                    continue
+
+        tags = recognize_faces(img, db, app, verbose=verbose)
+        if not tags:
+            continue
+
+        target = f if jpg_only else f.parent / (f.name + ".xmp")
+        write_tags(target, tags)
+        print(f"  {f.name}: {', '.join(tags)}")
+        tagged += 1
+
+    print(f"\nTagged {tagged}/{len(files)} files with recognized faces.")
+    if no_img > 0:
+        print(f"Skipped {no_img} files (no corresponding JPG or embedded preview found).")
+
+
+if __name__ == "__main__":
+    main()

@@ -2,7 +2,7 @@
 """
 Recognize faces in imported photos and write person tags to ORF XMP sidecars.
 
-Uses the corresponding JPGs for face detection (face_recognition can't read RAW),
+Uses the corresponding JPGs for face detection (InsightFace can't read RAW),
 but only writes tags to the XMP sidecar files in the raw directory.
 Creates XMP sidecars if they don't exist yet.
 
@@ -12,26 +12,49 @@ Usage: oly_face_tag <raw_dir>
   e.g. oly_face_tag /media/michael/blue_wd/pictures/olympus/raw/2026-03-27-Event/
 """
 
-import face_recognition
+import os
+import sys
+
+# cuDNN 9 is distributed as a pip package. dlopen reads LD_LIBRARY_PATH from the
+# initial process environment, so we must re-exec with it set if not already present.
+_cudnn_lib = os.path.join(sys.prefix,
+    f"lib/python{sys.version_info.major}.{sys.version_info.minor}/site-packages/nvidia/cudnn/lib")
+if os.path.isdir(_cudnn_lib) and _cudnn_lib not in os.environ.get("LD_LIBRARY_PATH", ""):
+    os.environ["LD_LIBRARY_PATH"] = _cudnn_lib + ":" + os.environ.get("LD_LIBRARY_PATH", "")
+    os.execv(sys.executable, [sys.executable, __file__] + sys.argv[1:])
+
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
+import cv2
+import numpy as np
 import pickle
 import subprocess
-import sys
+from insightface.app import FaceAnalysis
 from pathlib import Path
 
-DB_PATH = Path.home() / ".config/oly_face/encodings.pkl"
+DB_PATH = Path("/media/michael/blue_wd/pictures/.face_db/encodings.pkl")
 OLY_JPG = Path("/media/michael/blue_wd/pictures/olympus/jpg")
 OLY_RAW = Path("/media/michael/blue_wd/pictures/olympus/raw")
 
-TOLERANCE = 0.5
+SIMILARITY_THRESHOLD = 0.38  # minimum cosine similarity for best-match assignment
+MIN_ENCODINGS = 3
+TOP_K_FRACTION = 0.25   # fraction of top similarities to average for scoring
+TOP_K_MIN = 5            # minimum number of top similarities to use
 
 
 def load_db():
     if not DB_PATH.exists():
         print(f"Warning: face database not found at {DB_PATH}")
-        print("Run oly_face_setup first to build the database.")
+        print("Run face_db_setup first to build the database.")
         sys.exit(1)
     with open(DB_PATH, "rb") as f:
-        return pickle.load(f)
+        db = pickle.load(f)
+    filtered = {k: v for k, v in db.items() if len(v) >= MIN_ENCODINGS}
+    skipped = set(db) - set(filtered)
+    if skipped:
+        print(f"Skipping {len(skipped)} people with fewer than {MIN_ENCODINGS} encodings: {', '.join(sorted(skipped))}")
+    return filtered
 
 
 def find_jpg(orf_path):
@@ -45,38 +68,85 @@ def find_jpg(orf_path):
     return None
 
 
-def recognize_faces(jpg_path, db):
-    """Return sorted list of matched person tags for an image."""
-    try:
-        image = face_recognition.load_image_file(str(jpg_path))
-    except Exception as e:
-        print(f"  Could not load {jpg_path.name}: {e}")
+def recognize_faces(jpg_path, db, app, verbose=False):
+    """Return sorted list of best-match person tags (one per face) for an image."""
+    img = cv2.imread(str(jpg_path))
+    if img is None:
+        print(f"  Could not load {jpg_path.name}")
         return []
 
-    unknown_encodings = face_recognition.face_encodings(image)
-    if not unknown_encodings:
+    faces = app.get(img)
+    if not faces:
         return []
 
     matched = set()
-    for unknown_enc in unknown_encodings:
+    for i, face in enumerate(faces):
+        unknown_enc = face.normed_embedding  # 512-dim, L2-normalized
+        if verbose:
+            print(f"  face {i + 1}/{len(faces)}:")
+        best_tag = None
+        best_score = -1.0
         for tag, known_encs in db.items():
-            results = face_recognition.compare_faces(known_encs, unknown_enc, tolerance=TOLERANCE)
-            if any(results):
-                matched.add(tag)
+            known_mat = np.stack(known_encs)                          # (N, 512)
+            sims = known_mat @ unknown_enc                            # (N,) cosine similarities
+            k = min(max(TOP_K_MIN, int(len(sims) * TOP_K_FRACTION)), len(sims))
+            score = float(np.mean(np.partition(sims, -k)[-k:]))      # top-k mean
+            if verbose:
+                status = "MATCH" if score >= SIMILARITY_THRESHOLD else "     "
+                print(f"    {status}  {tag:30s}  top-{k}/{len(sims)} score={score:.4f}")
+            if score > best_score:
+                best_score = score
+                best_tag = tag
+        if best_tag is not None and best_score >= SIMILARITY_THRESHOLD:
+            matched.add(best_tag)
+        elif verbose:
+            print(f"    -> no match (best {best_score:.4f} < threshold {SIMILARITY_THRESHOLD})")
 
     return sorted(matched)
 
 
+def read_existing_tags(xmp_path):
+    """Return (existing_subjects, existing_hierarchical) from an XMP sidecar."""
+    if not xmp_path.exists():
+        return set(), set()
+    result = subprocess.run(
+        ["exiftool", "-XMP-dc:Subject", "-XMP-lr:HierarchicalSubject", "-s3", str(xmp_path)],
+        capture_output=True, text=True,
+    )
+    subjects = set()
+    hierarchical = set()
+    for line in result.stdout.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        # exiftool -s3 prints one value per line; multiple values are comma-separated
+        for val in line.split(","):
+            val = val.strip()
+            if "|" in val:
+                hierarchical.add(val)
+            else:
+                subjects.add(val)
+    return subjects, hierarchical
+
+
 def write_tags_to_xmp(xmp_path, tags):
-    """Write person tags to an XMP sidecar, creating it if needed."""
+    """Write person tags to an XMP sidecar, creating it if needed. Skips existing tags."""
+    existing_subjects, existing_hierarchical = read_existing_tags(xmp_path)
+
     flat = set()
     for tag in tags:
         flat.update(tag.split("|"))
 
+    new_subjects = sorted(flat - existing_subjects)
+    new_hierarchical = [t for t in tags if t not in existing_hierarchical]
+
+    if not new_subjects and not new_hierarchical:
+        return
+
     args = ["exiftool", "-overwrite_original"]
-    for t in sorted(flat):
+    for t in new_subjects:
         args.append(f"-XMP-dc:Subject+={t}")
-    for t in tags:
+    for t in new_hierarchical:
         args.append(f"-XMP-lr:HierarchicalSubject+={t}")
     args.append(str(xmp_path))
 
@@ -86,14 +156,23 @@ def write_tags_to_xmp(xmp_path, tags):
 
 
 def main():
-    if len(sys.argv) != 2:
-        print("Usage: oly_face_tag <raw_dir>")
-        sys.exit(1)
+    import argparse
+    parser = argparse.ArgumentParser(
+        description="Recognize faces in imported photos and write person tags to ORF XMP sidecars.")
+    parser.add_argument("raw_dir", help="Directory containing ORF RAW files")
+    parser.add_argument("--verbose", "-v", action="store_true",
+                        help="Print per-face similarity scores for threshold tuning")
+    args = parser.parse_args()
+    verbose = args.verbose
 
-    raw_dir = Path(sys.argv[1])
+    raw_dir = Path(args.raw_dir).resolve()
     if not raw_dir.is_dir():
         print(f"Error: {raw_dir} is not a directory")
         sys.exit(1)
+
+    print("Initializing InsightFace (buffalo_l)...")
+    app = FaceAnalysis(name="buffalo_l", providers=["CUDAExecutionProvider", "CPUExecutionProvider"])
+    app.prepare(ctx_id=0, det_size=(1280, 1280))
 
     db = load_db()
     total_enc = sum(len(v) for v in db.values())
@@ -113,7 +192,7 @@ def main():
             print(f"  {orf.name}: no corresponding JPG found, skipping")
             continue
 
-        tags = recognize_faces(jpg, db)
+        tags = recognize_faces(jpg, db, app, verbose=verbose)
         if not tags:
             continue
 

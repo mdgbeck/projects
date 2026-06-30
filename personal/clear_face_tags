@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+"""
+Remove face recognition tags (family|* and extfam|*) from XMP sidecar files.
+
+Removes both the hierarchical tags (XMP-lr:HierarchicalSubject) and the
+corresponding flat tags (XMP-dc:Subject) that were written by oly_face_tag
+or gen_face_retag. Does not touch any other tags.
+
+Usage:
+  clear_face_tags <dir>
+
+  dir — folder containing XMP sidecar files (searched non-recursively)
+
+Examples:
+  clear_face_tags /media/michael/blue_wd/pictures/olympus/raw/2026-03-26-FunRunEtc/
+  clear_face_tags /media/michael/blue_wd/pictures/dslr/RAW/2025-02-25-GroesbeckFeb/
+"""
+
+import subprocess
+import sys
+from pathlib import Path
+from xml.etree import ElementTree as ET
+
+
+def person_tags_from_xmp(xmp_path):
+    """Return list of 'family|name' or 'extfam|name' tags found in XMP."""
+    try:
+        tree = ET.parse(xmp_path)
+    except ET.ParseError:
+        return []
+    tags = []
+    for li in tree.iter("{http://www.w3.org/1999/02/22-rdf-syntax-ns#}li"):
+        t = (li.text or "").strip()
+        if t.startswith("family|") or t.startswith("extfam|"):
+            tags.append(t)
+    return tags
+
+
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: clear_face_tags <dir>")
+        sys.exit(1)
+
+    target = Path(sys.argv[1]).resolve()
+    if not target.is_dir():
+        print(f"Error: {target} is not a directory")
+        sys.exit(1)
+
+    xmps = sorted(target.glob("*.xmp"))
+    if not xmps:
+        print("No XMP files found.")
+        sys.exit(0)
+
+    print(f"Scanning {len(xmps)} XMP files in {target.name}...\n")
+
+    cleared = 0
+    for xmp in xmps:
+        person_tags = person_tags_from_xmp(xmp)
+        if not person_tags:
+            continue
+
+        flat = set()
+        for tag in person_tags:
+            flat.update(tag.split("|"))
+
+        args = ["exiftool", "-overwrite_original"]
+        for t in sorted(flat):
+            args.append(f"-XMP-dc:Subject-={t}")
+        for t in person_tags:
+            args.append(f"-XMP-lr:HierarchicalSubject-={t}")
+        args.append(str(xmp))
+
+        result = subprocess.run(args, capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"  Error ({xmp.name}): {result.stderr.strip()}")
+        else:
+            print(f"  {xmp.name}: removed {', '.join(person_tags)}")
+            cleared += 1
+
+    print(f"\nCleared face tags from {cleared}/{len(xmps)} XMP files.")
+
+
+if __name__ == "__main__":
+    main()

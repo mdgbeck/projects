@@ -1,0 +1,281 @@
+#!/home/michael/.venvs/face_rec/bin/python3
+"""
+Build face recognition database from already-tagged photos.
+
+Scans all XMP sidecars under PICTURES_ROOT for family|* and extfam|* tags,
+finds the corresponding image for each XMP, and saves face embeddings to a
+pickle file.
+
+For JPG-based XMPs (foo.jpg.xmp), uses the JPG directly.
+For RAW-based XMPs (foo.orf.xmp, foo.nef.xmp, etc.), looks for a paired JPG
+directory alongside the RAW directory, or falls back to extracting the RAW
+preview with exiftool.
+
+Only uses photos with exactly 1 face and 1 person tag to avoid ambiguity.
+Saves periodically so Ctrl+C is safe.
+
+Usage: face_db_setup
+"""
+
+import os
+import sys
+
+# cuDNN 9 is distributed as a pip package. dlopen reads LD_LIBRARY_PATH from the
+# initial process environment, so we must re-exec with it set if not already present.
+_cudnn_lib = os.path.join(sys.prefix,
+    f"lib/python{sys.version_info.major}.{sys.version_info.minor}/site-packages/nvidia/cudnn/lib")
+if os.path.isdir(_cudnn_lib) and _cudnn_lib not in os.environ.get("LD_LIBRARY_PATH", ""):
+    os.environ["LD_LIBRARY_PATH"] = _cudnn_lib + ":" + os.environ.get("LD_LIBRARY_PATH", "")
+    os.execv(sys.executable, [sys.executable, __file__] + sys.argv[1:])
+
+import cv2
+import numpy as np
+import pickle
+import signal
+import subprocess
+import tempfile
+from insightface.app import FaceAnalysis
+from pathlib import Path
+from xml.etree import ElementTree as ET
+
+DB_PATH = Path("/media/michael/blue_wd/pictures/.face_db/encodings.pkl")
+SEEN_PATH = Path("/media/michael/blue_wd/pictures/.face_db/seen.pkl")
+PICTURES_ROOT = Path("/media/michael/blue_wd/pictures")
+SAVE_INTERVAL = 25  # save after every N completed images
+DIVERSITY_THRESHOLD = 0.95  # skip new embedding if nearest existing is this similar (burst duplicates only)
+DET_SCORE_MIN = 0.7          # minimum InsightFace detection confidence for reference faces
+
+RAW_EXTENSIONS = {".orf", ".nef", ".cr2", ".cr3", ".arw", ".rw2", ".dng"}
+JPG_DIR_NAMES = {"jpg", "jpgs", "jpeg", "jpegs"}
+
+
+def person_tags_from_xmp(xmp_path):
+    """Return list of 'family|name' or 'extfam|name' tags from an XMP file."""
+    try:
+        tree = ET.parse(xmp_path)
+    except ET.ParseError:
+        return []
+    tags = []
+    for li in tree.iter("{http://www.w3.org/1999/02/22-rdf-syntax-ns#}li"):
+        t = (li.text or "").strip()
+        if "|" in t and (t.startswith("family|") or t.startswith("extfam|")):
+            tags.append(t)
+    return tags
+
+
+def find_paired_jpg_root(raw_dir):
+    """Given a RAW directory, find a sibling JPG directory, or None."""
+    parent = raw_dir.parent
+    for sibling in parent.iterdir():
+        if sibling.is_dir() and sibling.name.lower() in JPG_DIR_NAMES:
+            return sibling
+    return None
+
+
+def find_image_for_xmp(xmp_path):
+    """
+    Find the image file to use for face encoding.
+    Returns (image_path, is_tmp). is_tmp=True means caller must delete after use.
+    Returns (None, False) if no image can be found.
+    """
+    # Strip .xmp to get the base filename (e.g. foo.jpg or foo.orf)
+    base = xmp_path.with_suffix("")
+
+    # JPG-based XMP: image is right next to the XMP
+    if base.suffix.lower() in {".jpg", ".jpeg"}:
+        if base.exists():
+            return base, False
+        return None, False
+
+    # RAW-based XMP: look for paired JPG directory
+    if base.suffix.lower() in RAW_EXTENSIONS:
+        event_dir = xmp_path.parent
+        raw_dir = event_dir.parent
+        jpg_root = find_paired_jpg_root(raw_dir)
+        if jpg_root is not None:
+            stem = base.stem
+            for ext in [".jpg", ".JPG"]:
+                candidate = jpg_root / event_dir.name / (stem + ext)
+                if candidate.exists():
+                    return candidate, False
+
+        # Fall back to extracting embedded preview from RAW
+        if base.exists():
+            tmp = extract_preview(base)
+            if tmp:
+                return Path(tmp), True
+
+    return None, False
+
+
+def extract_preview(raw_path):
+    """Extract embedded preview JPEG from RAW using exiftool. Returns temp path or None."""
+    tmp = tempfile.NamedTemporaryFile(suffix=".jpg", delete=False)
+    tmp.close()
+    result = subprocess.run(
+        ["exiftool", "-b", "-PreviewImage", str(raw_path)],
+        capture_output=True,
+    )
+    if result.returncode == 0 and len(result.stdout) > 1000:
+        with open(tmp.name, "wb") as f:
+            f.write(result.stdout)
+        return tmp.name
+    os.unlink(tmp.name)
+    return None
+
+
+def save(db, seen):
+    with open(DB_PATH, "wb") as f:
+        pickle.dump(db, f)
+    with open(SEEN_PATH, "wb") as f:
+        pickle.dump(seen, f)
+
+
+def main():
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+    if not PICTURES_ROOT.exists():
+        print(f"Error: pictures root not found at {PICTURES_ROOT}")
+        print("Is the drive mounted?")
+        sys.exit(1)
+
+    print("Initializing InsightFace (buffalo_l)...")
+    app = FaceAnalysis(name="buffalo_l", providers=["CUDAExecutionProvider", "CPUExecutionProvider"])
+    app.prepare(ctx_id=0, det_size=(1280, 1280), det_thresh=0.3)
+    print("InsightFace ready.\n")
+
+    if DB_PATH.exists():
+        with open(DB_PATH, "rb") as f:
+            db = pickle.load(f)
+        total_enc = sum(len(v) for v in db.values())
+        print(f"Loaded existing database: {len(db)} people, {total_enc} encodings")
+    else:
+        db = {}
+
+    if SEEN_PATH.exists():
+        with open(SEEN_PATH, "rb") as f:
+            seen = pickle.load(f)
+        print(f"Skipping {len(seen)} already-processed files")
+    else:
+        seen = set()
+
+    # Collect all candidate work items upfront
+    xmp_files = sorted(PICTURES_ROOT.rglob("*.xmp"))
+    print(f"Found {len(xmp_files)} XMP files under {PICTURES_ROOT}\n")
+
+    work = []
+    skipped_multi = 0
+
+    for xmp_path in xmp_files:
+        if str(xmp_path) in seen:
+            continue
+
+        tags = person_tags_from_xmp(xmp_path)
+        if not tags:
+            seen.add(str(xmp_path))
+            continue
+
+        if len(tags) > 1:
+            seen.add(str(xmp_path))
+            skipped_multi += 1
+            continue
+
+        img_path, is_tmp = find_image_for_xmp(xmp_path)
+        if img_path is None:
+            seen.add(str(xmp_path))
+            continue
+
+        work.append((str(xmp_path), str(img_path), tags, is_tmp))
+
+    print(f"{len(work)} images to process")
+    print(f"(saves every {SAVE_INTERVAL} completions — Ctrl+C is safe)\n")
+
+    added = 0
+    skipped_no_face = 0
+    skipped_multi_faces = 0
+    skipped_low_quality = 0
+    skipped_duplicate = 0
+    completed = 0
+
+    interrupted = False
+    def handle_sigint(sig, frame):
+        nonlocal interrupted
+        interrupted = True
+        print("\nInterrupted — saving progress...")
+
+    signal.signal(signal.SIGINT, handle_sigint)
+
+    for xmp_str, img_str, tags, is_tmp in work:
+        if interrupted:
+            break
+
+        embedding = None
+        error = None
+        num_faces = 0
+
+        try:
+            img = cv2.imread(img_str)
+            if img is None:
+                error = "cv2 could not read image"
+            else:
+                faces = app.get(img)
+                num_faces = len(faces)
+                if num_faces == 1:
+                    face = faces[0]
+                    if face.det_score >= DET_SCORE_MIN:
+                        embedding = face.normed_embedding  # 512-dim, L2-normalized
+        except Exception as e:
+            error = str(e)
+        finally:
+            if is_tmp:
+                try:
+                    os.unlink(img_str)
+                except OSError:
+                    pass
+
+        completed += 1
+
+        if error:
+            print(f"  Error {Path(xmp_str).name}: {error}")
+        elif num_faces == 0:
+            seen.add(xmp_str)
+            skipped_no_face += 1
+        elif num_faces > 1:
+            seen.add(xmp_str)
+            skipped_multi_faces += 1
+        else:
+            if embedding is None:
+                seen.add(xmp_str)
+                skipped_low_quality += 1
+            else:
+                tag = tags[0]
+                existing = db.get(tag, [])
+                if existing and (np.stack(existing) @ embedding).max() >= DIVERSITY_THRESHOLD:
+                    seen.add(xmp_str)
+                    skipped_duplicate += 1
+                else:
+                    seen.add(xmp_str)
+                    db.setdefault(tag, []).append(embedding)
+                    added += 1
+                    print(f"  +1  {tag:30s}  {Path(xmp_str).name}")
+
+        if completed % SAVE_INTERVAL == 0:
+            save(db, seen)
+            print(f"  [{completed}/{len(work)} saved]")
+
+    save(db, seen)
+
+    if not interrupted:
+        print(f"\nDone. Processed {completed} images")
+        print(f"Added {added} encodings, skipped {skipped_no_face} (no face), {skipped_multi + skipped_multi_faces} (multiple faces/tags), {skipped_low_quality} (low det quality), {skipped_duplicate} (burst duplicate)")
+        print(f"\nDatabase summary:")
+        for person, encs in sorted(db.items()):
+            print(f"  {person}: {len(encs)} encodings")
+    else:
+        print(f"Saved after {completed} images. Re-run to continue.")
+
+    print(f"\nSaved to {DB_PATH}")
+
+
+if __name__ == "__main__":
+    main()
