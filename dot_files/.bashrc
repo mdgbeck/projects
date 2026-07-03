@@ -98,4 +98,8 @@ alias pico='sudo picocom /dev/ttyACM0 -b 115200'
 
 export PATH="$HOME/.local/bin:$PATH"
 
-PS1='\[\e[32m\]\u\[\e[0m\]:\[\e[34m\]\W\[\e[0m\]\$ '
+if [ -n "$SSH_CONNECTION" ]; then
+    PS1='\[\e[1;31m\]\h\[\e[0m\] \[\e[32m\]\u\[\e[0m\]:\[\e[34m\]\W\[\e[0m\]\$ '
+else
+    PS1='\[\e[32m\]\u\[\e[0m\]:\[\e[34m\]\W\[\e[0m\]\$ '
+fi
