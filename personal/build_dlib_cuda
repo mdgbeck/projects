@@ -9,26 +9,32 @@ VENV=~/.venvs/face_rec
 CUDA_ROOT=/usr/local/cuda
 BUILD_DIR=/tmp/dlib_cuda_build
 
-echo "==> Cleaning up any previous build..."
-rm -rf "$BUILD_DIR"
-mkdir -p "$BUILD_DIR"
-cd "$BUILD_DIR"
+echo "==> Installing build dependencies..."
+"$VENV/bin/pip" install wheel setuptools
+
+echo "==> Uninstalling existing dlib..."
+"$VENV/bin/pip" uninstall dlib -y || true
 
 echo "==> Downloading dlib $DLIB_VERSION source..."
-"$VENV/bin/pip" download "dlib==$DLIB_VERSION" --no-binary dlib --no-deps -d .
-tar -xf "dlib-${DLIB_VERSION}.tar.gz"
-cd "dlib-${DLIB_VERSION}"
+rm -rf "$BUILD_DIR"
+mkdir -p "$BUILD_DIR"
+"$VENV/bin/pip" download "dlib==$DLIB_VERSION" --no-binary dlib --no-deps -d "$BUILD_DIR"
+tar -xf "$BUILD_DIR/dlib-${DLIB_VERSION}.tar.gz" -C "$BUILD_DIR"
+cd "$BUILD_DIR/dlib-${DLIB_VERSION}"
 
-echo "==> Building and installing with CUDA enabled..."
-"$VENV/bin/pip" uninstall dlib -y
-"$VENV/bin/python3" setup.py install \
+echo "==> Building wheel with CUDA enabled..."
+"$VENV/bin/python3" setup.py bdist_wheel \
     --set DLIB_USE_CUDA=ON \
-    --set CUDA_TOOLKIT_ROOT_DIR="$CUDA_ROOT"
+    --set CUDA_TOOLKIT_ROOT_DIR="$CUDA_ROOT" \
+    --set CUDA_HOST_COMPILER=/usr/bin/gcc-12
+
+echo "==> Installing wheel..."
+"$VENV/bin/pip" install dist/*.whl
 
 echo "==> Verifying CUDA support..."
 "$VENV/bin/python3" -c "import dlib; print('DLIB_USE_CUDA:', dlib.DLIB_USE_CUDA)"
 
-echo "==> Cleaning up build directory..."
+echo "==> Cleaning up..."
 rm -rf "$BUILD_DIR"
 
 echo "Done."
