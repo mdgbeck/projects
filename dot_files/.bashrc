@@ -96,9 +96,11 @@ tm() { tmux attach -t "$1" 2>/dev/null || tmux new -s "$1"; }
 alias tl='tmux ls'
 alias pico='sudo picocom /dev/ttyACM0 -b 115200'
 
-alias update_all='sudo dnf update && flatpak update && sudo npm update -g'
+alias update_all='sudo dnf update && flatpak update && npm update -g'
 
 export PATH="$HOME/.local/bin:$PATH"
+
+eval "$(/home/michael/.local/bin/mise activate bash)"
 
 if [ -n "$SSH_CONNECTION" ]; then
     PS1='\[\e[1;31m\]\h\[\e[0m\] \[\e[32m\]\u\[\e[0m\]:\[\e[34m\]\W\[\e[0m\]\$ '
