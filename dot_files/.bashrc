@@ -92,7 +92,7 @@ set -o vi
 alias c='clear'
 alias p='pwd'
 alias eal='vim ~/Documents/projects/dot_files/alacritty.toml'
-tm() { tmux attach -t "$1" 2>/dev/null || tmux new -s "$1"; }
+tm() { tmux new-session -A -s "${1:-main}"; }
 alias tl='tmux ls'
 alias pico='sudo picocom /dev/ttyACM0 -b 115200'
 
