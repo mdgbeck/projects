@@ -95,6 +95,8 @@ alias eal='vim ~/Documents/projects/dot_files/alacritty.toml'
 tm() { tmux new-session -A -s "${1:-main}"; }
 alias tl='tmux ls'
 alias pico='sudo picocom /dev/ttyACM0 -b 115200'
+# cd to the server share; set SRV_MAIN where it's mounted elsewhere
+sm() { cd "${SRV_MAIN:-/srv/main}/$1" 2>/dev/null || echo "sm: ${SRV_MAIN:-/srv/main} not mounted? (set SRV_MAIN)"; }
 
 alias update_all='sudo dnf update && flatpak update && npm update -g'
 
